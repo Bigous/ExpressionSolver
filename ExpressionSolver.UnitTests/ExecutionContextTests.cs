@@ -60,6 +60,42 @@ public class ExecutionContextTests
         Assert.AreEqual(expectedExpressions, numExpressions, "Number of expressions in the compiled result is not correct!");
     }
 
+    [TestMethod]
+    public void StandardContext_Compile_ShouldThrowOnInvalidExpression()
+    {
+        // Arrange
+        var context = ExecutionContext.CreateStandardContext();
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => context.Compile("1 + "));
+    }
+
+    [TestMethod]
+    public void StandardContext_Compile_ShouldThrowOnInvalidFunction()
+    {
+        // Arrange
+        var context = ExecutionContext.CreateStandardContext();
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => context.Compile("invalidFunction(1, 2)"));
+    }
+
+    [TestMethod]
+    public void StandardContext_Optimize_ShouldOptimizeExpression()
+    {
+        // Arrange
+        var context = ExecutionContext.CreateStandardContext();
+        var expression = "1 + 2 * 3 - 4 / 2"; // Should optimize to 7
+        // Act
+        var compiledExpression = context.Compile(expression);
+        var optimizedExpression = context.Optimize(compiledExpression);
+        // Assert
+        Assert.IsNotNull(optimizedExpression);
+        var numExpressions = GetNumberOfExpressions(optimizedExpression);
+        
+        Assert.AreEqual(1, numExpressions, "Optimized expression did not minimize expressions.");
+        Assert.IsInstanceOfType<Constant>(optimizedExpression, "Optimized expression should be a Constant.");
+        Assert.AreEqual(7m, optimizedExpression.Compute(), "Optimized expression did not compute to the expected value.");
+    }
+
 
     private int GetNumberOfExpressions(IExpression expression)
     {

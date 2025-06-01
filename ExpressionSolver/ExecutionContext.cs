@@ -39,17 +39,12 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
     }
     public bool TryRemoveFunctionCreator(string name) => _functionCreators.Remove(name);
     // TryGetFunctionCreator modificado para retornar FunctionMetadata
-    public bool TryGetFunctionCreator(string name, [MaybeNullWhen(false)] out FunctionMetadata funcMetadata) => 
+    public bool TryGetFunctionCreator(string name, [MaybeNullWhen(false)] out FunctionMetadata funcMetadata) =>
         _functionCreators.TryGetValue(name, out funcMetadata);
 
     public decimal Solve(string expression) => Compile(expression).Compute();
 
-    public IExpression Compile(string expression)
-    {
-        var tokens = Tokenize(expression);
-        var expressionTree = BuildExpressionTree(tokens);
-        return expressionTree;
-    }
+    public IExpression Compile(string expression) => BuildExpressionTree(Tokenize(expression));
 
     private IList<Token> Tokenize(string expression)
     {
@@ -387,7 +382,6 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
         outputStack.Push(newExpressionNode);
     }
 
-    // ApplyFunctionCall modificado para usar FunctionMetadata
     private void ApplyFunctionCall(Stack<IExpression> outputStack, Stack<Token> operatorStack)
     {
         Token funcToken = operatorStack.Pop();
@@ -412,7 +406,7 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
             }
             args.Reverse();
         }
-        
+
         IExpression funcExpressionNode = funcCreator(args);
         outputStack.Push(funcExpressionNode);
     }
@@ -424,7 +418,7 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
     /// <param name="expression"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    public IExpression Optimize(IExpression expression) // Alterado para IExpression
+    public IExpression Optimize(IExpression expression)
     {
         if (expression is Constant || expression is Variable)
         {
@@ -453,7 +447,7 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
 
             if (allOperandsAreConstant && canConstantEval)
             {
-                if (_operatorCreators.TryGetValue(op.Name, out var creator) && op.Name != "?:" && op.Name != "?" && op.Name != ":")
+                if (_operatorCreators.TryGetValue(op.Name, out var creator))
                 {
                     try
                     {
