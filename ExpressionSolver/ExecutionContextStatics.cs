@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -92,17 +93,38 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
             var v2 = parameters[1].Compute();
             return v1 > v2 ? v1 : v2;
         }));
+        ret.TryAddFunctionCreator("max3", 3, static parameters => new Function("max3", 15, 3, true, parameters, parameters =>
+        {
+            var v1 = parameters[0].Compute();
+            var v2 = parameters[1].Compute();
+            var v3 = parameters[3].Compute();
+            return v1 > v2 ? (v1 > v3 ? v1 : v3) : (v2 > v3 ? v2 : v3);
+        }));
         ret.TryAddFunctionCreator("min", 2, static parameters => new Function("min", 15, 2, true, parameters, parameters =>
         {
             var v1 = parameters[0].Compute();
             var v2 = parameters[1].Compute();
             return v1 < v2 ? v1 : v2;
         }));
+        ret.TryAddFunctionCreator("min3", 3, static parameters => new Function("min3", 15, 3, true, parameters, parameters =>
+        {
+            var v1 = parameters[0].Compute();
+            var v2 = parameters[1].Compute();
+            var v3 = parameters[3].Compute();
+            return v1 < v2 ? (v1 < v3 ? v1 : v3) : (v2 < v3 ? v2 : v3);
+        }));
         ret.TryAddFunctionCreator("if", 3, static parameters =>
             new Function("if", 1, 15, false,
                          parameters,
                          args => args[0].Compute() != 0m ? args[1].Compute() : args[2].Compute()));
         ret.TryAddFunctionCreator("rand", 0, static parameters => new Function("rand", 15, 0, false, parameters, parameters => Convert.ToDecimal(Random.Shared.NextDouble())));
+        ret.TryAddFunctionCreator("rand_range", 2, static parameters => new Function("rand_range", 15, 2, false, parameters, args =>
+        {
+            var min = Convert.ToInt32(args[0].Compute());
+            var max = Convert.ToInt32(args[1].Compute());
+            if (min >= max) throw new ArgumentException("O valor mínimo deve ser menor que o valor máximo.");
+            return Random.Shared.Next(min, max + 1);
+        }));
         ret.TryAddFunctionCreator("abs", 1, static parameters => new Function("abs", 15, 1, true, parameters, parameters => Math.Abs(parameters[0].Compute())));
         ret.TryAddFunctionCreator("round", 1, static parameters => new Function("round", 15, 1, true, parameters, parameters => Math.Round(parameters[0].Compute())));
         ret.TryAddFunctionCreator("floor", 1, static parameters => new Function("floor", 15, 1, true, parameters, parameters => Math.Floor(parameters[0].Compute())));
