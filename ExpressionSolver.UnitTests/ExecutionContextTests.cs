@@ -5,7 +5,7 @@ namespace ExpressionSolver.UnitTests;
 [TestClass]
 public class ExecutionContextTests
 {
-    [TestMethod]
+    [DataTestMethod]
     [DataRow("1 + 2", 4)] // 1, +, 2, EOF
     [DataRow("1 - 2", 4)]
     [DataRow("1 * 2", 4)]
@@ -33,7 +33,7 @@ public class ExecutionContextTests
         Assert.AreEqual(numberOfTokens, tokenList.Count, "Number of tokens is not correct!");
     }
 
-    [TestMethod]
+    [DataTestMethod]
     [DataRow("1 + 2", 3)] // Constant, Operator, Constant
     [DataRow("1 - 2", 3)]
     [DataRow("1 * 2", 3)]
