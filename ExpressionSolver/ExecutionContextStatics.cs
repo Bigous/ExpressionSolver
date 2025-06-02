@@ -66,11 +66,25 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
         ret.TryAddOperatorCreator("u-", static operands => new UnaryOperator("u-", true, 13, operands[0], op => -op.Compute()));
         ret.TryAddOperatorCreator("u+", static operands => new UnaryOperator("u+", true, 13, operands[0], op => op.Compute())); // u+ geralmente é no-op
 
-
         // Functions - Chamadas TryAddFunctionCreator atualizadas para incluir a aridade
-        ret.TryAddFunctionCreator("sin", 1, static parameters => new Function("sin", 15, 1, true, parameters, parameters => Convert.ToDecimal(Math.Sin(Convert.ToDouble(parameters[0].Compute())))));
-        ret.TryAddFunctionCreator("cos", 1, static parameters => new Function("cos", 15, 1, true, parameters, parameters => Convert.ToDecimal(Math.Cos(Convert.ToDouble(parameters[0].Compute())))));
-        ret.TryAddFunctionCreator("sqrt", 1, static parameters => new Function("sqrt", 15, 1, true, parameters, parameters => Convert.ToDecimal(Math.Sqrt(Convert.ToDouble(parameters[0].Compute())))));
+        ret.TryAddFunctionCreator("sin", 1, static parameters => new Function("sin", 15, 1, true, parameters, parameters => DecimalMath.Sin(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("cos", 1, static parameters => new Function("cos", 15, 1, true, parameters, parameters => DecimalMath.Cos(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("tan", 1, static parameters => new Function("tan", 15, 1, true, parameters, parameters => DecimalMath.Tan(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("log", 1, static parameters => new Function("log", 15, 1, true, parameters, parameters => DecimalMath.Log(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("log10", 1, static parameters => new Function("log10", 15, 1, true, parameters, parameters => DecimalMath.Log10(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("exp", 1, static parameters => new Function("exp", 15, 1, true, parameters, parameters => DecimalMath.Exp(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("asin", 1, static parameters => new Function("asin", 15, 1, true, parameters, parameters => DecimalMath.Asin(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("acos", 1, static parameters => new Function("acos", 15, 1, true, parameters, parameters => DecimalMath.Acos(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("atan", 1, static parameters => new Function("atan", 15, 1, true, parameters, parameters => DecimalMath.Atan(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("atan2", 2, static parameters => new Function("atan2", 15, 2, true, parameters, parameters =>
+        {
+            var y = parameters[0].Compute();
+            var x = parameters[1].Compute();
+            return DecimalMath.Atan2(y, x);
+        }));
+        ret.TryAddFunctionCreator("rad", 1, static parameters => new Function("rad", 15, 1, true, parameters, parameters => parameters[0].Compute() * DecimalMath.PI / 180.0m));
+        ret.TryAddFunctionCreator("deg", 1, static parameters => new Function("deg", 15, 1, true, parameters, parameters => parameters[0].Compute() * 180.0m / DecimalMath.PI));
+        ret.TryAddFunctionCreator("sqrt", 1, static parameters => new Function("sqrt", 15, 1, true, parameters, parameters => DecimalMath.Sqrt(parameters[0].Compute())));
         ret.TryAddFunctionCreator("max", 2, static parameters => new Function("max", 15, 2, true, parameters, parameters =>
         {
             var v1 = parameters[0].Compute();
@@ -88,10 +102,15 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
                          parameters,
                          args => args[0].Compute() != 0m ? args[1].Compute() : args[2].Compute()));
         ret.TryAddFunctionCreator("rand", 0, static parameters => new Function("rand", 15, 0, false, parameters, parameters => Convert.ToDecimal(Random.Shared.NextDouble())));
+        ret.TryAddFunctionCreator("abs", 1, static parameters => new Function("abs", 15, 1, true, parameters, parameters => Math.Abs(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("round", 1, static parameters => new Function("round", 15, 1, true, parameters, parameters => Math.Round(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("floor", 1, static parameters => new Function("floor", 15, 1, true, parameters, parameters => Math.Floor(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("ceil", 1, static parameters => new Function("ceil", 15, 1, true, parameters, parameters => Math.Ceiling(parameters[0].Compute())));
+
 
         // Constants
-        ret.TryAddConstant("pi", new Constant("pi", 3.1415926535897932384626433832795m));
-        ret.TryAddConstant("e", new Constant("e", 2.7182818284590452353602874713527m));
+        ret.TryAddConstant("pi", new Constant("pi", DecimalMath.PI));
+        ret.TryAddConstant("e", new Constant("e", DecimalMath.E));
         ret.TryAddConstant("true", new Constant("true", 1m)); // Representa verdadeiro como 1
         ret.TryAddConstant("false", new Constant("false", 0m)); // Representa falso como 0
 
