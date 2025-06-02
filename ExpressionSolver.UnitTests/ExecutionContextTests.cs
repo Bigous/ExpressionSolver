@@ -18,6 +18,7 @@ public class ExecutionContextTests
     [DataRow("(1 * 2)", 6)]
     [DataRow("sqrt(4)", 5)]
     [DataRow("max(4, 3, 2)", 9)]
+    [DataRow("1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + log(100)", 43)]
     public void StandardContext_Tokenize_ShouldReturnCorrectTokens(string expression, int numberOfTokens)
     {
         // Arrange
@@ -47,6 +48,8 @@ public class ExecutionContextTests
     [DataRow("sqrt(4)", 2)]
     [DataRow("max(4, 3)", 3)]
     [DataRow("if(2, 3, 4)", 4)]
+    [DataRow("abs(-5)", 2)]
+    [DataRow("1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + log(100)", 30)]
     public void StandardContext_Compile_ShouldCompileExpression(string expression, int expectedExpressions)
     {
         // Arrange
@@ -83,7 +86,7 @@ public class ExecutionContextTests
     {
         // Arrange
         var context = ExecutionContext.CreateStandardContext();
-        var expression = "1 + 2 * 3 - 4 / 2"; // Should optimize to 7
+        var expression = "1 + 2 * 3 - 4 / 2"; // Should optimize to 5
         // Act
         var compiledExpression = context.Compile(expression);
         var optimizedExpression = context.Optimize(compiledExpression);
@@ -93,7 +96,7 @@ public class ExecutionContextTests
         
         Assert.AreEqual(1, numExpressions, "Optimized expression did not minimize expressions.");
         Assert.IsInstanceOfType<Constant>(optimizedExpression, "Optimized expression should be a Constant.");
-        Assert.AreEqual(7m, optimizedExpression.Compute(), "Optimized expression did not compute to the expected value.");
+        Assert.AreEqual(5m, optimizedExpression.Compute(), "Optimized expression did not compute to the expected value.");
     }
 
 

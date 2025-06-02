@@ -4,13 +4,13 @@ namespace ExpressionSolver;
 
 public static class DecimalMath
 {
-    public const decimal PI = 3.14159265358979323846264338327950288419716939937510m;
-    public const decimal E = 2.71828182845904523536028747135266249775724709369995m;
-    private const decimal LN2 = 0.69314718055994530941723212145818m; // ln(2)
-    private const decimal INV_LOG10 = 0.43429448190325182765112891891661m; // 1 / Log(10)
+    public const decimal PI = 3.1415926535897932384626433832m;
+    public const decimal E = 2.7182818284590452353602874713m;
+    private const decimal LN2 = 0.6931471805599453094172321214m; // ln(2)
+    private const decimal INV_LOG10 = 0.4342944819032518276511289189m; // 1 / Log(10)
 
-    private const int MaxIterations = 50;
-    private const int MaxTerms = 25;
+    private const int MaxIterations = 100;
+    private const int MaxTerms = 50;
 
     public static decimal Sin(decimal value)
     {
