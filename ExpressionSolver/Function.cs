@@ -20,4 +20,6 @@ public class Function(string name, int precedence, int arity, bool constantEval,
     public IEnumerable<IExpression> GetOperands() => parameters;
 
     public decimal Compute() => func(parameters);
+
+    public override string ToString() => $"{Name}({string.Join(", ", parameters.Select(p => p.ToString()))})";
 }

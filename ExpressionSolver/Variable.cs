@@ -13,4 +13,6 @@ public class Variable(string name, decimal value) : IExpression
     public decimal Value { get; set; } = value;
 
     public decimal Compute() => Value;
+
+    public override string ToString() => Name;
 }

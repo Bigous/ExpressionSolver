@@ -24,4 +24,6 @@ public class BinaryOperator(string name, int precedence, IExpression right, IExp
         yield return right;
         yield return left;
     }
+
+    public override string ToString() => $"{right} {Name} {left}";
 }

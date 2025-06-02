@@ -150,7 +150,7 @@ public class ExecutionContextTests
     }
 
     [DataTestMethod]
-    [DataRow("44 * 38 + x * y * 25 * 7")]
+    [DataRow("44 * 38 + x * y ** 2 * 7")]
     [DataRow("x * y * 25 * 7 + 44 * 38")]
     [DataRow("sqrt(x * x + y * y + abs(-5))")]
     public void CustomContextWithVariable_ShouldOptimizeAndCompute(string expression)

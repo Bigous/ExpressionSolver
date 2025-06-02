@@ -22,4 +22,6 @@ public class UnaryOperator(string name, bool isRightOperation, int precedence, I
     {
         yield return operand;
     }
+
+    public override string ToString() => IsRightOperator ? $"{operand} {Name}" : $"{Name} {operand}";
 }
