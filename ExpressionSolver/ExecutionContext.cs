@@ -28,6 +28,7 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
     public bool TryGetConstant(string name, [MaybeNullWhen(false)] out Constant constant) => _constants.TryGetValue(name, out constant);
 
     public bool TryAddVariable(Variable customVariable) => HasIdentifier(customVariable.Name) ? false : _variables.TryAdd(customVariable.Name, customVariable);
+    public bool TryAddVariable(string name, decimal value) => HasIdentifier(name) ? false : _variables.TryAdd(name, new(name, value));
     public bool TryRemoveVariable(string name) => _variables.Remove(name);
     public bool TryGetVariable(string name, [MaybeNullWhen(false)] out Variable variable) => _variables.TryGetValue(name, out variable);
 
@@ -417,7 +418,6 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
     /// </summary>
     /// <param name="expression"></param>
     /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
     public IExpression Optimize(IExpression expression)
     {
         if (expression is Constant || expression is Variable)
@@ -427,48 +427,103 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
 
         if (expression is IOperator op)
         {
-            var operands = op.GetOperands().ToList();
-            var optimizedOperands = new List<IExpression>();
+            var originalOperands = op.GetOperands().ToList();
+            var optimizedOperands = new List<IExpression>(originalOperands.Count);
             bool allOperandsAreConstant = true;
+            bool anyOperandChangedFromOriginal = false; 
 
-            foreach (var operand in operands)
+            for (int i = 0; i < originalOperands.Count; i++)
             {
-                var optimizedOperand = Optimize(operand);
+                var originalOperand = originalOperands[i];
+                var optimizedOperand = Optimize(originalOperand); 
                 optimizedOperands.Add(optimizedOperand);
+
+                if (!ReferenceEquals(originalOperand, optimizedOperand))
+                {
+                    anyOperandChangedFromOriginal = true;
+                }
                 if (!(optimizedOperand is Constant))
                 {
                     allOperandsAreConstant = false;
                 }
             }
 
-            bool canConstantEval = false;
-            if (op is Function func) canConstantEval = func.ConstantEval;
-            else if (op is BinaryOperator || op is UnaryOperator) canConstantEval = true;
-
+            // 1. Tentativa de colapso total para constante se todos os operandos forem constantes
+            bool canConstantEval = (op is Function func && func.ConstantEval) || op is BinaryOperator || op is UnaryOperator;
             if (allOperandsAreConstant && canConstantEval)
             {
-                if (_operatorCreators.TryGetValue(op.Name, out var creator))
+                IExpression tempNodeToCompute = null;
+                if (_operatorCreators.TryGetValue(op.Name, out var opCreatorEval))
                 {
-                    try
-                    {
-                        var tempOpWithConstants = creator(optimizedOperands);
-                        return new Constant(string.Empty, tempOpWithConstants.Compute());
-                    }
-                    catch { }
+                    tempNodeToCompute = opCreatorEval(optimizedOperands);
                 }
-                // Lógica de otimização de função modificada para usar FunctionMetadata
-                else if (op is Function opFunc && _functionCreators.TryGetValue(opFunc.Name, out var funcMetadata))
+                else if (op is Function opFuncEval && _functionCreators.TryGetValue(opFuncEval.Name, out var funcMetaEval))
+                {
+                    tempNodeToCompute = funcMetaEval.Creator(optimizedOperands);
+                }
+
+                if (tempNodeToCompute != null)
                 {
                     try
                     {
-                        var funcCreator = funcMetadata.Creator;
-                        var tempFuncWithConstants = funcCreator(optimizedOperands);
-                        return new Constant(string.Empty, tempFuncWithConstants.Compute());
+                        return new Constant(string.Empty, tempNodeToCompute.Compute());
                     }
-                    catch { }
+                    catch
+                    {
+                        // A avaliação falhou (ex: divisão por zero em tempo de otimização).
+                        // Não otimizar para constante, prosseguir para outras otimizações.
+                    }
                 }
             }
 
+            // 2. Otimizações específicas de reestruturação (ex: para '*')
+            if (op.Name == "*" && optimizedOperands.Count == 2)
+            {
+                var opA = optimizedOperands[0];
+                var opB = optimizedOperands[1];
+
+                // Padrão: (X * C1) * C2  =>  X * (C1 * C2)
+                if (opA is IOperator innerOpA && innerOpA.Name == "*" && innerOpA.GetOperands().Count() == 2 && opB is Constant constB_val)
+                {
+                    var innerOperandsA = innerOpA.GetOperands().ToList();
+                    if (innerOperandsA[1] is Constant constA1_val)
+                    {
+                        return _operatorCreators["*"](new List<IExpression> { innerOperandsA[0], new Constant("", constA1_val.Compute() * constB_val.Compute()) });
+                    }
+                }
+                // Padrão: C1 * (X * C2)  =>  X * (C1 * C2)
+                if (opA is Constant constA_val && opB is IOperator innerOpB && innerOpB.Name == "*" && innerOpB.GetOperands().Count() == 2)
+                {
+                    var innerOperandsB = innerOpB.GetOperands().ToList();
+                    if (innerOperandsB[1] is Constant constB2_val) // X * C2
+                    {
+                        return _operatorCreators["*"](new List<IExpression> { innerOperandsB[0], new Constant("", constA_val.Compute() * constB2_val.Compute()) });
+                    }
+                    // Padrão: C1 * (C2 * X) => X * (C1*C2) (garante que X venha primeiro se possível)
+                    else if (innerOperandsB[0] is Constant constB1_val && !(innerOperandsB[1] is Constant)) // C2 * X
+                    {
+                         return _operatorCreators["*"](new List<IExpression> { innerOperandsB[1], new Constant("", constA_val.Compute() * constB1_val.Compute()) });
+                    }
+                }
+            }
+
+            // 3. Se nenhuma otimização específica de reestruturação retornou,
+            //    e se algum dos operandos originais mudou para sua forma otimizada,
+            //    recrie o operador atual com os operandos otimizados.
+            if (anyOperandChangedFromOriginal)
+            {
+                if (_operatorCreators.TryGetValue(op.Name, out var opCreatorRebuild))
+                {
+                    return opCreatorRebuild(optimizedOperands);
+                }
+                else if (op is Function opFuncRebuild && _functionCreators.TryGetValue(opFuncRebuild.Name, out var funcMetaRebuild))
+                {
+                    return funcMetaRebuild.Creator(optimizedOperands);
+                }
+            }
+
+            // 4. Se nada mudou (nem colapso para constante, nem reestruturação, nem operandos alterados),
+            //    retorne a expressão original.
             return expression;
         }
         return expression;

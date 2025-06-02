@@ -18,7 +18,7 @@ public class ExecutionContextTests
     [DataRow("(1 * 2)", 6)]
     [DataRow("sqrt(4)", 5)]
     [DataRow("max(4, 3, 2)", 9)]
-    [DataRow("1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + log(100)", 43)]
+    [DataRow("1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + log(100)", 44)]
     public void StandardContext_Tokenize_ShouldReturnCorrectTokens(string expression, int numberOfTokens)
     {
         // Arrange
@@ -48,8 +48,8 @@ public class ExecutionContextTests
     [DataRow("sqrt(4)", 2)]
     [DataRow("max(4, 3)", 3)]
     [DataRow("if(2, 3, 4)", 4)]
-    [DataRow("abs(-5)", 2)]
-    [DataRow("1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + log(100)", 30)]
+    [DataRow("abs(-5)", 3)]
+    [DataRow("1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + log(100)", 31)]
     public void StandardContext_Compile_ShouldCompileExpression(string expression, int expectedExpressions)
     {
         // Arrange
@@ -99,6 +99,89 @@ public class ExecutionContextTests
         Assert.AreEqual(5m, optimizedExpression.Compute(), "Optimized expression did not compute to the expected value.");
     }
 
+    [TestMethod]
+    public void CustomContexWithVariable_ShouldCompileAndCompute()
+    {
+        // Arrange
+        var context = ExecutionContext.CreateStandardContext();
+        context.TryAddVariable("x", 10m);
+        context.TryAddVariable("y", 20m);
+        
+        // Act
+        var expression = "x + y"; // Should compile to a BinaryOperator
+        var compiledExpression = context.Compile(expression);
+        
+        // Assert
+        Assert.IsNotNull(compiledExpression);
+        Assert.IsInstanceOfType<BinaryOperator>(compiledExpression, "Compiled expression should be a BinaryOperator.");
+        Assert.AreEqual(30m, compiledExpression.Compute(), "Compiled expression did not compute to the expected value.");
+    }
+
+    [TestMethod]
+    public void CustomContextWithVariable_ShouldThrowOnUndefinedVariable()
+    {
+        // Arrange
+        var context = ExecutionContext.CreateStandardContext();
+        
+        // Act & Assert
+        Assert.ThrowsException<ArgumentException>(() => context.Compile("undefinedVariable + 1"));
+    }
+
+    [TestMethod]
+    public void CustomContextWihVariable_ShoudNotOptimizeAndCompute()
+    {
+        // Arrange
+        var context = ExecutionContext.CreateStandardContext();
+        context.TryAddVariable("x", 10m);
+        context.TryAddVariable("y", 20m);
+        
+        // Act
+        var expression = "10 + x + y * 4"; // Should compile to a BinaryOperator and cannot be optimized
+        var compiledExpression = context.Compile(expression);
+        var numExpressions = GetNumberOfExpressions(compiledExpression);
+        var optimizedExpression = context.Optimize(compiledExpression);
+        var numExpressionsOptimized = GetNumberOfExpressions(optimizedExpression);
+
+        // Assert
+        Assert.IsNotNull(optimizedExpression);
+        Assert.IsInstanceOfType<BinaryOperator>(optimizedExpression, "Optimized expression should be a Constant.");
+        Assert.AreEqual(100m, optimizedExpression.Compute(), "Optimized expression did not compute to the expected value.");
+        Assert.AreEqual(numExpressions, numExpressionsOptimized, "Optimize over optimized the expression.");
+    }
+
+    [DataTestMethod]
+    [DataRow("44 * 38 + x * y * 25 * 7")]
+    [DataRow("x * y * 25 * 7 + 44 * 38")]
+    [DataRow("sqrt(x * x + y * y + abs(-5))")]
+    public void CustomContextWithVariable_ShouldOptimizeAndCompute(string expression)
+    {
+        // Arrange
+        var context = ExecutionContext.CreateStandardContext();
+        context.TryAddVariable("x", 10m);
+        context.TryAddVariable("y", 20m);
+        
+        // Act
+        var compiledExpression = context.Compile(expression);
+        var numExpressions = GetNumberOfExpressions(compiledExpression);
+        var expectedValue = compiledExpression.Compute();
+        var optimizedExpression = context.Optimize(compiledExpression);
+        var numExpressionsOptimized = GetNumberOfExpressions(optimizedExpression);
+        // Assert
+        Assert.IsNotNull(optimizedExpression);
+        Assert.AreEqual(expectedValue, optimizedExpression.Compute(), "Optimized expression did not compute to the expected value.");
+        Assert.IsTrue(numExpressionsOptimized < numExpressions, "Optimize did not reduce the number of expressions as expected.");
+    }
+
+    [TestMethod]
+    public void CustomContextWithVariable_ShouldThrowOnInvalidExpression()
+    {
+        // Arrange
+        var context = ExecutionContext.CreateStandardContext();
+        context.TryAddVariable("x", 10m);
+        
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => context.Compile("x + "));
+    }
 
     private int GetNumberOfExpressions(IExpression expression)
     {
