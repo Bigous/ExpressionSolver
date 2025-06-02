@@ -98,7 +98,7 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
             return v1 < v2 ? v1 : v2;
         }));
         ret.TryAddFunctionCreator("if", 3, static parameters =>
-            new Function("if", 1, 3, false, // Precedência baixa, não associativo à direita para funções não é tão relevante
+            new Function("if", 1, 15, false,
                          parameters,
                          args => args[0].Compute() != 0m ? args[1].Compute() : args[2].Compute()));
         ret.TryAddFunctionCreator("rand", 0, static parameters => new Function("rand", 15, 0, false, parameters, parameters => Convert.ToDecimal(Random.Shared.NextDouble())));
