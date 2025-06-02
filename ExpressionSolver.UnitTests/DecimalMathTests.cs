@@ -161,11 +161,11 @@ public class DecimalMathTests
     [DataRow(0.50000)]
     [DataRow(0.10000)]
     [DataRow(25.00000)]
-    public void Log_ShouldMatchMathLog(double val)
+    public void Ln_ShouldMatchMathLog(double val)
     {
         decimal inputValue = RoundInput(val);
         decimal expected = (decimal)Math.Log((double)inputValue);
-        decimal actual = DecimalMath.Log(inputValue);
+        decimal actual = DecimalMath.Ln(inputValue);
         Assert.AreEqual(expected, actual, Tolerance, $"Log({inputValue})");
     }
 
@@ -185,6 +185,21 @@ public class DecimalMathTests
         Assert.AreEqual(expected, actual, Tolerance, $"Log10({inputValue})");
     }
 
+    [DataTestMethod]
+    [DataRow(1.0, 2)]
+    [DataRow(10.00000, 4)]
+    [DataRow(100.00000, 3)]
+    [DataRow(0.50000, 5)]
+    [DataRow(0.10000, 8)]
+    [DataRow(2.00000, 10)]
+    [DataRow(50.00000,12)]
+    public void Log_ShouldMatchMathLog10(double val, double b)
+    {
+        decimal inputValue = RoundInput(val);
+        decimal expected = (decimal)Math.Log((double)inputValue, b);
+        decimal actual = DecimalMath.Log(inputValue, RoundInput(b));
+        Assert.AreEqual(expected, actual, Tolerance, $"Log({inputValue}, {b})");
+    }
     [DataTestMethod]
     [DataRow(0.0)]
     [DataRow(1.00000)]

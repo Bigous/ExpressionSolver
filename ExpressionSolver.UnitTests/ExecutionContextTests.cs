@@ -18,7 +18,7 @@ public class ExecutionContextTests
     [DataRow("(1 * 2)", 6)]
     [DataRow("sqrt(4)", 5)]
     [DataRow("max(4, 3, 2)", 9)]
-    [DataRow("1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + log(100)", 44)]
+    [DataRow("1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + ln(100)", 44)]
     public void StandardContext_Tokenize_ShouldReturnCorrectTokens(string expression, int numberOfTokens)
     {
         // Arrange
@@ -49,7 +49,7 @@ public class ExecutionContextTests
     [DataRow("max(4, 3)", 3)]
     [DataRow("if(2, 3, 4)", 4)]
     [DataRow("abs(-5)", 3)]
-    [DataRow("1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + log(100)", 31)]
+    [DataRow("1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + ln(100)", 31)]
     public void StandardContext_Compile_ShouldCompileExpression(string expression, int expectedExpressions)
     {
         // Arrange

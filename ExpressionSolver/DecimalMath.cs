@@ -189,7 +189,7 @@ public static class DecimalMath
         }
     }
 
-    public static decimal Log(decimal value)
+    public static decimal Ln(decimal value)
     {
         if (value <= 0m)
             throw new ArgumentOutOfRangeException(nameof(value), "Argumento para Log deve ser positivo.");
@@ -226,7 +226,17 @@ public static class DecimalMath
     public static decimal Log10(decimal value)
     {
         // Log10(x) = Log(x) / Log(10) = Log(x) * INV_LOG10
-        return Log(value) * INV_LOG10;
+        return Ln(value) * INV_LOG10;
+    }
+
+    public static decimal Log(decimal value, decimal baseValue)
+    {
+        if (baseValue <= 1m || baseValue <= 0m)
+            throw new ArgumentOutOfRangeException(nameof(baseValue), "Base do logaritmo deve ser maior que 1 e positiva.");
+        if (value <= 0m)
+            throw new ArgumentOutOfRangeException(nameof(value), "Valor do logaritmo deve ser positivo.");
+        // Log(x, b) = Log(x) / Log(b)
+        return Ln(value) / Ln(baseValue);
     }
 
     public static decimal Exp(decimal value)

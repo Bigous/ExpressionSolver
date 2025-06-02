@@ -70,8 +70,9 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
         ret.TryAddFunctionCreator("sin", 1, static parameters => new Function("sin", 15, 1, true, parameters, parameters => DecimalMath.Sin(parameters[0].Compute())));
         ret.TryAddFunctionCreator("cos", 1, static parameters => new Function("cos", 15, 1, true, parameters, parameters => DecimalMath.Cos(parameters[0].Compute())));
         ret.TryAddFunctionCreator("tan", 1, static parameters => new Function("tan", 15, 1, true, parameters, parameters => DecimalMath.Tan(parameters[0].Compute())));
-        ret.TryAddFunctionCreator("log", 1, static parameters => new Function("log", 15, 1, true, parameters, parameters => DecimalMath.Log(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("log", 1, static parameters => new Function("log", 15, 2, true, parameters, parameters => DecimalMath.Log(parameters[0].Compute(), parameters[1].Compute())));
         ret.TryAddFunctionCreator("log10", 1, static parameters => new Function("log10", 15, 1, true, parameters, parameters => DecimalMath.Log10(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("ln", 1, static parameters => new Function("ln", 15, 1, true, parameters, parameters => DecimalMath.Ln(parameters[0].Compute())));
         ret.TryAddFunctionCreator("exp", 1, static parameters => new Function("exp", 15, 1, true, parameters, parameters => DecimalMath.Exp(parameters[0].Compute())));
         ret.TryAddFunctionCreator("asin", 1, static parameters => new Function("asin", 15, 1, true, parameters, parameters => DecimalMath.Asin(parameters[0].Compute())));
         ret.TryAddFunctionCreator("acos", 1, static parameters => new Function("acos", 15, 1, true, parameters, parameters => DecimalMath.Acos(parameters[0].Compute())));
