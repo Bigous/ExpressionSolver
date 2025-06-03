@@ -9,13 +9,14 @@ using System.Threading.Tasks;
 
 namespace ExpressionSolverBench;
 
+[MemoryDiagnoser]
 public class ExpressionSolverVSStringMath
 {
     private const string ShortExpression = "1 + 2";
     private const string MidExpressionSolver = "1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2";
-    private const string LongExpressionSolver = "1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + log(100)";
+    private const string LongExpressionSolver = "1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + log(100,2)";
     private const string MidExpressionMath = "1 + 2 * 3 - 4 / 2 + (sqrt 16) - 3 ^ 2";
-    private const string LongExpressionMath = "1 + 2 * 3 - 4 / 2 + (sqrt 16) - 3 ^ 2 + (5 max 10) - (3 min 7) + (abs -5) + (log 100)";
+    private const string LongExpressionMath = "1 + 2 * 3 - 4 / 2 + (sqrt 16) - 3 ^ 2 + (5 max 10) - (3 min 7) + (abs -5) + (100 log 2)";
 
     private ExpressionSolver.ExecutionContext _context = ExpressionSolver.ExecutionContext.CreateStandardContext();
 
