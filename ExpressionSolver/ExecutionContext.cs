@@ -29,13 +29,13 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
     public bool TryRemoveVariable(string name) => _variables.Remove(name);
     public bool TryGetVariable(string name, [MaybeNullWhen(false)] out Variable variable) => _variables.TryGetValue(name, out variable);
 
-    public bool TryAddFunctionCreator(string name, int arity, Func<IList<IExpression>, Function> funcCreator)
+    public bool TryAddFunctionCreator(string name, int arity, Func<IList<IExpression>, IFunction> funcCreator)
     {
         if (HasIdentifier(name)) return false;
         return _functionCreators.TryAdd(name, new FunctionMetadata(arity, funcCreator));
     }
     public bool TryRemoveFunctionCreator(string name) => _functionCreators.Remove(name);
-    public bool TryGetFunctionCreator(string name, [MaybeNullWhen(false)] out Func<IList<IExpression>, Function> funcCreator)
+    public bool TryGetFunctionCreator(string name, [MaybeNullWhen(false)] out Func<IList<IExpression>, IFunction> funcCreator)
     {
         if (_functionCreators.TryGetValue(name, out var funcMetadata))
         {

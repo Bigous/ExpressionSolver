@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver;
 
-public class FunctionManyArgs(string name, IList<IExpression> parameters, Func<IList<IExpression>, decimal> func) : IFunction
+public class GeneratorManyArgs(string name, IList<IExpression> parameters, Func<IList<IExpression>, decimal> func) : IFunction
 {
     public string Name => name;
 
@@ -9,7 +9,7 @@ public class FunctionManyArgs(string name, IList<IExpression> parameters, Func<I
 
     public int Precedence => 15;
 
-    public bool ConstantEval => true;
+    public bool ConstantEval => false;
 
     public IEnumerable<IExpression> GetOperands() => parameters;
 

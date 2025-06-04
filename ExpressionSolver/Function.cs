@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ExpressionSolver;
 
-public class Function(string name, int precedence, int arity, bool constantEval, IList<IExpression> parameters, Func<IList<IExpression>, decimal> func) : IOperator
+public class Function(string name, int precedence, int arity, bool constantEval, IList<IExpression> parameters, Func<IList<IExpression>, decimal> func) : IFunction
 {
     public string Name => name;
 

@@ -9,7 +9,7 @@ namespace ExpressionSolver;
 
 public partial class ExecutionContext
 {
-    internal record FunctionMetadata(int Arity, Func<IList<IExpression>, Function> Creator);
+    internal record FunctionMetadata(int Arity, Func<IList<IExpression>, IFunction> Creator);
     internal record OperatorMetadata(string Name, int Precedence, bool IsRightAssociative, int Arity, bool IsUnary = false);
 
     internal bool HasIdentifier(string identifier) => _functionCreators.ContainsKey(identifier) || _variables.ContainsKey(identifier) || _constants.ContainsKey(identifier) || _operatorCreators.ContainsKey(identifier);

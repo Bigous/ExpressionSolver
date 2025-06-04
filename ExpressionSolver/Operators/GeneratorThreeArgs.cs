@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver;
 
-public class FunctionThreeArgs(string name, IExpression parameter1, IExpression parameter2, IExpression parameter3, Func<IExpression, IExpression, IExpression, decimal> func) : IFunction
+public class GeneratorThreeArgs(string name, IExpression parameter1, IExpression parameter2, IExpression parameter3, Func<IExpression, IExpression, IExpression, decimal> func) : IFunction
 {
     public string Name => name;
 
@@ -9,7 +9,7 @@ public class FunctionThreeArgs(string name, IExpression parameter1, IExpression 
 
     public int Precedence => 15;
 
-    public bool ConstantEval => true;
+    public bool ConstantEval => false;
 
     public IEnumerable<IExpression> GetOperands()
     {

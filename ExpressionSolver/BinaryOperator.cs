@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ExpressionSolver;
 
-public class BinaryOperator(string name, int precedence, IExpression right, IExpression left, Func<IExpression, IExpression, decimal> computeOperation) : IOperator
+public class BinaryOperator(string name, int precedence, IExpression right, IExpression left, Func<IExpression, IExpression, decimal> computeOperation) : IBinaryOperator
 {
     public string Name => name;
 

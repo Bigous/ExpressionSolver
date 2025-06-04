@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver;
 
-public class FunctionOneArg(string name, IExpression parameter, Func<IExpression, decimal> func) : IFunction
+public class GeneratorOneArg(string name, IExpression parameter, Func<IExpression, decimal> func) : IFunction
 {
     public string Name => name;
 
@@ -9,7 +9,7 @@ public class FunctionOneArg(string name, IExpression parameter, Func<IExpression
 
     public int Precedence => 15;
 
-    public bool ConstantEval => true;
+    public bool ConstantEval => false;
 
     public IEnumerable<IExpression> GetOperands() { yield return parameter; }
 

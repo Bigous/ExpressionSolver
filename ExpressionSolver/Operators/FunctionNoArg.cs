@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace ExpressionSolver;
 
-namespace ExpressionSolver;
-
-public class FunctionNoArg(string name, bool constantEval, Func<decimal> func) : IFunction
+public class FunctionNoArg(string name, Func<decimal> func) : IFunction
 {
     public string Name => name;
 
@@ -15,7 +9,7 @@ public class FunctionNoArg(string name, bool constantEval, Func<decimal> func) :
 
     public int Precedence => 15;
 
-    public bool ConstantEval => constantEval;
+    public bool ConstantEval => true;
 
     public IEnumerable<IExpression> GetOperands() { yield break; }
 
