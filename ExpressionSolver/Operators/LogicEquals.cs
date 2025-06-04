@@ -1,16 +1,16 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class Reminder(IExpression Left, IExpression Right) : IOperator
+public class LogicEquals(IExpression Left, IExpression Right) : IOperator
 {
-    public string Name => "%";
+    public string Name => "==";
 
     public int Arity => 2;
 
     public bool IsRightOperator => false;
 
-    public int Precedence => 12;
+    public int Precedence => 8;
 
-    public decimal Compute() => Left.Compute() % Right.Compute();
+    public decimal Compute() => Left.Compute() == Right.Compute() ? 1m : 0m;
 
     public IEnumerable<IExpression> GetOperands()
     {

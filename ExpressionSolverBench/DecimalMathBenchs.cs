@@ -441,14 +441,143 @@ public class DecimalMathBenchs
         return twoPowerK * sum_er;
     }
 
-    [Benchmark]
-    public void Ln_MinMax() => DecimalMath.Ln(2.0m);
+    public static decimal Sin_tylor(decimal value)
+    {
+        // Normalizar para o intervalo [0, 2*PI)
+        decimal x = value % DecimalMath.TWO_PI;
+        if (x < 0m) x += DecimalMath.TWO_PI;
+
+        // Redução de argumento para [0, PI/2] para melhor convergência
+        decimal sign = 1m;
+        if (x > DecimalMath.PI_OVER_2 && x <= DecimalMath.PI) // Quadrante II
+        {
+            x = DecimalMath.PI - x;
+        }
+        else if (x > DecimalMath.PI && x <= DecimalMath.THREE_PI_OVER_2) // Quadrante III
+        {
+            x = x - DecimalMath.PI;
+            sign = -1m;
+        }
+        else if (x > DecimalMath.THREE_PI_OVER_2 && x < DecimalMath.TWO_PI) // Quadrante IV
+        {
+            x = DecimalMath.TWO_PI - x;
+            sign = -1m;
+        }
+
+        decimal term = x;
+        decimal sum = x;
+        decimal xSquared = x * x;
+
+        for (int n = 1; n < DecimalMath.MaxTerms; n++)
+        {
+            long factor1 = 2L * n;
+            long factor2 = 2L * n + 1;
+            term *= -xSquared / (factor1 * factor2);
+
+            if (sum + term == sum)
+                break;
+            sum += term;
+        }
+        return sign * sum;
+    }
+
+    public static decimal Cos_tylor(decimal value)
+    {
+        decimal x = value % DecimalMath.TWO_PI;
+        if (x < 0m) x += DecimalMath.TWO_PI;
+
+        decimal sign = 1m;
+        if (x > DecimalMath.PI_OVER_2 && x <= DecimalMath.PI)
+        {
+            x = DecimalMath.PI - x;
+            sign = -1m;
+        }
+        else if (x > DecimalMath.PI && x <= DecimalMath.THREE_PI_OVER_2)
+        {
+            x = x - DecimalMath.PI;
+            sign = -1m;
+        }
+        else if (x > DecimalMath.THREE_PI_OVER_2 && x < DecimalMath.TWO_PI)
+        {
+            x = DecimalMath.TWO_PI - x;
+        }
+
+        decimal term = 1m;
+        decimal sum = 1m;
+        decimal xSquared = x * x;
+
+        for (int n = 1; n < DecimalMath.MaxTerms; n++)
+        {
+            long factor1 = 2L * n - 1;
+            long factor2 = 2L * n;
+            term *= -xSquared / (factor1 * factor2);
+
+            if (sum + term == sum)
+                break;
+            sum += term;
+        }
+        return sign * sum;
+    }
+
+    public static decimal Atan(decimal value)
+    {
+        if (value == 0m) return 0m;
+
+        if (value == 1m) return DecimalMath.PI / 4m;
+        if (value == -1m) return -DecimalMath.PI / 4m;
+
+        if (Math.Abs(value) > 1m)
+        {
+            if (value > 1m)
+                return DecimalMath.PI_OVER_2 - Atan(1m / value);
+            else // value < -1m
+                return -DecimalMath.PI_OVER_2 - Atan(1m / value);
+        }
+
+        decimal x = value;
+        decimal sum = x;
+        decimal term = x;
+        decimal xSquared = x * x;
+
+        for (int n = 1; n < DecimalMath.MaxTerms * 2; n++)
+        {
+            term *= -xSquared * (2L * n - 1) / (2L * n + 1);
+
+            if (sum + term == sum)
+                break;
+            sum += term;
+        }
+        return sum;
+    }
+
+    // Defina os valores a serem testados
+    [Params(0.1, 0.5, 0.7, 1.0, 1.5, 2.0, -0.5)]
+    public double Value { get; set; }
 
     [Benchmark]
-    public void Ln_Tylor() => Ln_tylor(2.0m);
+    public void Ln_MinMax() => DecimalMath.Ln((decimal)Value);
 
     [Benchmark]
-    public void Exp_MinMax() => DecimalMath.Exp(2.0m);
+    public void Ln_Tylor() => Ln_tylor((decimal)Value);
+
     [Benchmark]
-    public void Exp_Tylor() => Exp_tylor(2.0m);
+    public void Exp_MinMax() => DecimalMath.Exp((decimal)Value);
+
+    [Benchmark]
+    public void Exp_Tylor() => Exp_tylor((decimal)Value);
+
+    [Benchmark]
+    public void Sin_MinMax() => DecimalMath.Sin((decimal)Value);
+
+    [Benchmark]
+    public void Sin_Tylor() => Sin_tylor((decimal)Value);
+
+    [Benchmark]
+    public void Cos_MinMax() => DecimalMath.Cos((decimal)Value);
+
+    [Benchmark]
+    public void Cos_Tylor() => Cos_tylor((decimal)Value);
+    
+    [Benchmark]
+    public void Atan_Tylor() => Atan((decimal)Value);
 }

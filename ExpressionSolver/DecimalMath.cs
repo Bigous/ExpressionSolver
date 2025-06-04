@@ -9,11 +9,11 @@ public static class DecimalMath
     public const decimal THREE_PI_OVER_2 = (3m * PI) / 2m;
     public const decimal TWO_PI = 2m * PI;
     public const decimal E = 2.7182818284590452353602874713m;
-    internal const decimal LN2 = 0.6931471805599453094172321214m; // ln(2)
-    internal const decimal INV_LOG10 = 0.4342944819032518276511289189m; // 1 / Log(10)
+    public const decimal LN2 = 0.6931471805599453094172321214m; // ln(2)
+    public const decimal INV_LOG10 = 0.4342944819032518276511289189m; // 1 / Log(10)
 
-    internal const int MaxIterations = 100; // Ainda pode ser usado por Sqrt
-    internal const int MaxTerms = 50;    // Ainda pode ser usado por Sin, Cos, Exp, Atan
+    public const int MaxIterations = 100; // Ainda pode ser usado por Sqrt
+    public const int MaxTerms = 50;    // Ainda pode ser usado por Sin, Cos, Atan
 
     // Grau do polinômio: 20
     // Intervalo de aproximação para x_poly: (0.5, 1.0]
@@ -21,7 +21,7 @@ public static class DecimalMath
     // Precisão de trabalho mpmath (dps): 50
     // Número de pontos de ajuste: 10000
     // Erro maximo aferido: 3.783002313e-17
-    private static readonly decimal[] LnCoefficients = new decimal[]
+    internal static readonly decimal[] LnCoefficients = new decimal[]
     {
         -27.7820315854339204174599445676875473991892085m,
         438.037437366718703774562014492789921512128798m,
@@ -52,7 +52,7 @@ public static class DecimalMath
     // Função aproximada: exp(x_poly)
     // Precisão de trabalho mpmath (dps): 50
     // Número de pontos de ajuste: 10000
-    private static readonly decimal[] ExpCoefficients = new decimal[]
+    internal static readonly decimal[] ExpCoefficients = new decimal[]
     {
         0.00000000000000015643281607979890113134415758309075331910053m,
         0.00000000000000281602510137494514395524411525232147680166594m,
@@ -73,6 +73,66 @@ public static class DecimalMath
         0.500000000000000000000000000000603899966336168m,
         1.00000000000000000000000000000224321124224682m,
         0.999999999999999999999999999999999654515407177m
+    };
+
+    // Grau do polinômio: 20
+    // Intervalo de aproximação para x_poly: (0, 1.5707963267948966192313216916397514420985846996876]
+    // Função aproximada: sin(x_poly)
+    // Precisão de trabalho mpmath (dps): 50
+    // Número de pontos de ajuste: 10000
+    private static readonly decimal[] SinCoefficients = new decimal[]
+    {
+        0.000000000000000000288565372967092080154910283554541578014434566m,
+        -0.0000000000000000103020613832564404063466084302914382514783212m,
+        0.00000000000000000947136763506471723503643888938116479276465938m,
+        0.00000000000000278134468141772025648080944177219239433082883m,
+        0.0000000000000000706106557676478754247100952007639228335174385m,
+        -0.000000000000764842466555375155050852162680558619320503477m,
+        0.000000000000000174877325186593568435259188413628363147230693m,
+        0.000000000160590247810318726119754451469113162854113794m,
+        0.000000000000000164086250092263268782682323128178864974009561m,
+        -0.0000000250521084972089544380015783118878271153145241m,
+        0.0000000000000000600266596360082826553049804953711783984341511m,
+        0.00000275573192237336048418404398192733637116295208m,
+        0.00000000000000000819674816624199076105066977741091078583313959m,
+        -0.000198412698412700434812690513991005357572954697m,
+        0.000000000000000000369314310377482510741962284121311221281237488m,
+        0.00833333333333333328514479699927832482955240726m,
+        0.00000000000000000000426792936897961832897942732306761820482039266m,
+        -0.166666666666666666666904250936577382330473209m,
+        0.00000000000000000000000733742415171493728887050293378265681734234652m,
+        0.999999999999999999999999900337008328456308806m,
+        0.00000000000000000000000000033440456681639416397223173331817625024433154m
+    };
+
+    // Grau do polinômio: 20
+    // Intervalo de aproximação para x_poly: (0, 1.5707963267948966192313216916397514420985846996876]
+    // Função aproximada: cos(x_poly)
+    // Precisão de trabalho mpmath (dps): 50
+    // Número de pontos de ajuste: 10000
+    private static readonly decimal[] CosCoefficients = new decimal[]
+    {
+        0.000000000000000000288565372964675876144757721059369296791409032m,
+        0.00000000000000000123651282535632288308409647339533272800706901m,
+        -0.000000000000000162713757206367805794589848571568524226496727m,
+        0.0000000000000000225663802737054005185905230900166258873027645m,
+        0.0000000000000477388496870792266858161359855504940316057927m,
+        0.000000000000000103844166481127080506763727299180822094809675m,
+        -0.0000000000114708938721217246038198392343435334822920342m,
+        0.000000000000000165254729016519175245451674814746930572371154m,
+        0.00000000208767555390491284539611388910175251405397841m,
+        0.000000000000000100147269494981989716299526088884850547421463m,
+        -0.000000275573192294306787084632995311936231124080892m,
+        0.0000000000000000231217389050778387092678585433660248491745217m,
+        0.0000248015873015797225153744924764691925011133464m,
+        0.00000000000000000188413663700905685307874941278559893745235451m,
+        -0.00138888888888888923532054824849077900829709715m,
+        0.000000000000000000045471203612873632340007214168102017384538835m,
+        0.0416666666666666666626181555448518626673263089m,
+        0.000000000000000000000226433594823851701543876673367751884043424392m,
+        -0.500000000000000000000007022767414177101786699m,
+        0.0000000000000000000000000957563050225891392316764498697182221805826807m,
+        0.999999999999999999999999999677571165776348051m
     };
 
     public static decimal Sin(decimal value)
@@ -98,21 +158,14 @@ public static class DecimalMath
             sign = -1m;
         }
 
-        decimal term = x;
-        decimal sum = x;
-        decimal xSquared = x * x;
-
-        for (int n = 1; n < MaxTerms; n++)
+        // Avaliação do polinômio usando o método de Horner
+        decimal result = 0;
+        foreach (var coeff in SinCoefficients)
         {
-            long factor1 = 2L * n;
-            long factor2 = 2L * n + 1;
-            term *= -xSquared / (factor1 * factor2);
-
-            if (sum + term == sum)
-                break;
-            sum += term;
+            result = result * x + coeff;
         }
-        return sign * sum;
+
+        return sign * result;
     }
 
     public static decimal Cos(decimal value)
@@ -136,21 +189,14 @@ public static class DecimalMath
             x = TWO_PI - x;
         }
 
-        decimal term = 1m;
-        decimal sum = 1m;
-        decimal xSquared = x * x;
-
-        for (int n = 1; n < MaxTerms; n++)
+        // Avaliação do polinômio usando o método de Horner
+        decimal result = 0;
+        foreach (var coeff in CosCoefficients)
         {
-            long factor1 = 2L * n - 1;
-            long factor2 = 2L * n;
-            term *= -xSquared / (factor1 * factor2);
-
-            if (sum + term == sum)
-                break;
-            sum += term;
+            result = result * x + coeff;
         }
-        return sign * sum;
+
+        return sign * result;
     }
 
     public static decimal Tan(decimal value)

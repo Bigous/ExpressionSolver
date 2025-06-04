@@ -17,4 +17,6 @@ public class Divide(IExpression Left, IExpression Right) : IOperator
         yield return Left;
         yield return Right;
     }
+
+    public override string ToString() => $"{Left} {Name} {Right}";
 }

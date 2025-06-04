@@ -2,7 +2,7 @@
 
 public class Power(IExpression Left, IExpression Right) : IOperator
 {
-    public string Name => "+";
+    public string Name => "**";
 
     public int Arity => 2;
 
@@ -17,4 +17,6 @@ public class Power(IExpression Left, IExpression Right) : IOperator
         yield return Left;
         yield return Right;
     }
+
+    public override string ToString() => $"{Left} {Name} {Right}";
 }
