@@ -334,44 +334,121 @@ public class DecimalMathBenchs
         return result;
     }
 
+    //[Benchmark]
+    //public void MathPow_01() => Math.Pow(2.0, 3.0);
+    //[Benchmark]
+    //public void DecimalMathPow_01() => DecimalMath.Pow(2.0m, 3.0m);
+    //[Benchmark]
+    //public void AlternativePow01_01() => AlternativePow_01(2.0m, 3.0m);
+    //[Benchmark]
+    //public void AlternativePow02_01() => AlternativePow_02(2.0m, 3.0m);
+    //[Benchmark]
+    //public void AlternativePow03_01() => AlternativePow_03(2.0m, 3.0m);
+    //[Benchmark]
+    //public void MathPow_02() => Math.Pow(2.8, 3.18);
+    //[Benchmark]
+    //public void DecimalMathPow_02() => DecimalMath.Pow(2.8m, 3.18m);
+    //[Benchmark]
+    //public void AlternativePow01_02() => AlternativePow_01(2.8m, 3.18m);
+    //[Benchmark]
+    //public void AlternativePow02_02() => AlternativePow_02(2.8m, 3.18m);
+    //[Benchmark]
+    //public void AlternativePow03_02() => AlternativePow_03(2.8m, 3.18m);
+    //[Benchmark]
+    //public void MathPow_03() => Math.Pow(2.8, -3.18);
+    //[Benchmark]
+    //public void DecimalMathPow_03() => DecimalMath.Pow(2.8m, -3.18m);
+    //[Benchmark]
+    //public void AlternativePow01_03() => AlternativePow_01(2.8m, -3.18m);
+    //[Benchmark]
+    //public void AlternativePow02_03() => AlternativePow_02(2.8m, -3.18m);
+    //[Benchmark]
+    //public void AlternativePow03_03() => AlternativePow_03(2.8m, -3.18m);
+    //[Benchmark]
+    //public void MathPow_04() => Math.Pow(-1, 30);
+    //[Benchmark]
+    //public void DecimalMathPow_04() => DecimalMath.Pow(-1, 30);
+    //[Benchmark]
+    //public void AlternativePow01_04() => AlternativePow_01(-1, 30);
+    //[Benchmark]
+    //public void AlternativePow02_04() => AlternativePow_02(-1, 30);
+    //[Benchmark]
+    //public void AlternativePow03_04() => AlternativePow_03(-1, 30);
+
+    public static decimal Ln_tylor(decimal value)
+    {
+        if (value <= 0m)
+            throw new ArgumentOutOfRangeException(nameof(value), "Argumento para Log deve ser positivo.");
+        if (value == 1m) return 0m;
+
+        decimal s = value;
+        int p = 0;
+
+        while (s >= 2m) { s /= 2m; p++; }
+        while (s < 1m) { s *= 2m; p--; }
+
+        decimal y = (s - 1m) / (s + 1m);
+        decimal ySquared = y * y;
+
+        decimal termComponent = y;
+        decimal sum_logs_s = y;
+
+        for (int n = 1; n < DecimalMath.MaxTerms; n++)
+        {
+            termComponent *= ySquared;
+            decimal termToAdd = termComponent / (2 * n + 1);
+
+            if (sum_logs_s + termToAdd == sum_logs_s)
+                break;
+            sum_logs_s += termToAdd;
+        }
+        return 2m * sum_logs_s + p * DecimalMath.LN2;
+    }
+
+    public static decimal Exp_tylor(decimal value)
+    {
+        if (value == 0m) return 1m;
+
+        if (value < -65m) return 0m;
+        if (value > 66m) throw new OverflowException("Argumento muito grande para Exp, resultaria em overflow.");
+
+        decimal k_decimal = Math.Round(value / DecimalMath.LN2);
+        int k = (int)k_decimal;
+        decimal r = value - k_decimal * DecimalMath.LN2;
+
+        decimal term = 1m;
+        decimal sum_er = 1m;
+
+        for (int n = 1; n < DecimalMath.MaxTerms; n++)
+        {
+            term *= r / n;
+            if (sum_er + term == sum_er)
+                break;
+            sum_er += term;
+        }
+
+        decimal twoPowerK = 1m;
+        if (k > 0)
+        {
+            for (int i = 0; i < k; i++) twoPowerK *= 2m;
+        }
+        else if (k < 0)
+        {
+            // Usar 0.5m para multiplicação em vez de divisão repetida pode ser marginalmente melhor
+            // mas a divisão por 2m é exata para decimal.
+            for (int i = 0; i < -k; i++) twoPowerK /= 2m;
+        }
+        return twoPowerK * sum_er;
+    }
+
     [Benchmark]
-    public void MathPow_01() => Math.Pow(2.0, 3.0);
+    public void Ln_MinMax() => DecimalMath.Ln(2.0m);
+
     [Benchmark]
-    public void DecimalMathPow_01() => DecimalMath.Pow(2.0m, 3.0m);
+    public void Ln_Tylor() => Ln_tylor(2.0m);
+
     [Benchmark]
-    public void AlternativePow01_01() => AlternativePow_01(2.0m, 3.0m);
+    public void Exp_MinMax() => DecimalMath.Exp(2.0m);
     [Benchmark]
-    public void AlternativePow02_01() => AlternativePow_02(2.0m, 3.0m);
-    [Benchmark]
-    public void AlternativePow03_01() => AlternativePow_03(2.0m, 3.0m);
-    [Benchmark]
-    public void MathPow_02() => Math.Pow(2.8, 3.18);
-    [Benchmark]
-    public void DecimalMathPow_02() => DecimalMath.Pow(2.8m, 3.18m);
-    [Benchmark]
-    public void AlternativePow01_02() => AlternativePow_01(2.8m, 3.18m);
-    [Benchmark]
-    public void AlternativePow02_02() => AlternativePow_02(2.8m, 3.18m);
-    [Benchmark]
-    public void AlternativePow03_02() => AlternativePow_03(2.8m, 3.18m);
-    [Benchmark]
-    public void MathPow_03() => Math.Pow(2.8, -3.18);
-    [Benchmark]
-    public void DecimalMathPow_03() => DecimalMath.Pow(2.8m, -3.18m);
-    [Benchmark]
-    public void AlternativePow01_03() => AlternativePow_01(2.8m, -3.18m);
-    [Benchmark]
-    public void AlternativePow02_03() => AlternativePow_02(2.8m, -3.18m);
-    [Benchmark]
-    public void AlternativePow03_03() => AlternativePow_03(2.8m, -3.18m);
-    [Benchmark]
-    public void MathPow_04() => Math.Pow(-1, 30);
-    [Benchmark]
-    public void DecimalMathPow_04() => DecimalMath.Pow(-1, 30);
-    [Benchmark]
-    public void AlternativePow01_04() => AlternativePow_01(-1, 30);
-    [Benchmark]
-    public void AlternativePow02_04() => AlternativePow_02(-1, 30);
-    [Benchmark]
-    public void AlternativePow03_04() => AlternativePow_03(-1, 30);
+    public void Exp_Tylor() => Exp_tylor(2.0m);
 }
