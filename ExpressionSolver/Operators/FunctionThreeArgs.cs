@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ExpressionSolver;
 
-public class FunctionThreeArg(string name, bool constantEval, IExpression parameter1, IExpression parameter2, IExpression parameter3, Func<IExpression, IExpression, IExpression, decimal> func) : IOperator
+public class FunctionThreeArg(string name, bool constantEval, IExpression parameter1, IExpression parameter2, IExpression parameter3, Func<IExpression, IExpression, IExpression, decimal> func) : IFunction
 {
     public string Name => name;
 

@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class Divide(IExpression Left, IExpression Right) : IOperator
+public class Divide(IExpression Left, IExpression Right) : IBinaryOperator
 {
     public string Name => "/";
 

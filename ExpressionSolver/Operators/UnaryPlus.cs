@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class UnaryPlus(IExpression Operand) : IOperator
+public class UnaryPlus(IExpression Operand) : IUnaryOperator
 {
     public string Name => "u+";
 

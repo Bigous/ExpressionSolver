@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ExpressionSolver;
 
-public class FunctionNoArg(string name, bool constantEval, Func<decimal> func) : IOperator
+public class FunctionNoArg(string name, bool constantEval, Func<decimal> func) : IFunction
 {
     public string Name => name;
 

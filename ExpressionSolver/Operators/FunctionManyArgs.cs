@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ExpressionSolver;
 
-public class FunctionManyArgs(string name, bool constantEval, IList<IExpression> parameters, Func<IList<IExpression>, decimal> func) : IOperator
+public class FunctionManyArgs(string name, bool constantEval, IList<IExpression> parameters, Func<IList<IExpression>, decimal> func) : IFunction
 {
     public string Name => name;
 
