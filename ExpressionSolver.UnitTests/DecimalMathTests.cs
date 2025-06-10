@@ -165,7 +165,7 @@ public class DecimalMathTests
     {
         decimal inputValue = RoundInput(val);
         decimal expected = (decimal)Math.Log((double)inputValue);
-        decimal actual = DecimalMath.Ln(inputValue);
+        decimal actual = DecimalMath.Ln_MinMax(inputValue);
         Assert.AreEqual(expected, actual, Tolerance, $"Log({inputValue})");
     }
 
@@ -221,7 +221,7 @@ public class DecimalMathTests
         }
 
         decimal expected = (decimal)Math.Exp((double)inputValue);
-        decimal actual = DecimalMath.Exp(inputValue);
+        decimal actual = DecimalMath.Exp_MinMax(inputValue);
         Assert.AreEqual(expected, actual, Tolerance, $"Exp({inputValue})");
     }
 
@@ -240,5 +240,21 @@ public class DecimalMathTests
         decimal expected = (decimal)Math.Sqrt((double)inputValue);
         decimal actual = DecimalMath.Sqrt(inputValue);
         Assert.AreEqual(expected, actual, Tolerance, $"Sqrt({inputValue})");
+    }
+
+    [DataTestMethod]
+    [DataRow(2.0, 3.0)]
+    [DataRow(5.0, 2.0)]
+    [DataRow(10.0, -1.0)]
+    [DataRow(0.0, 0.0)] // Caso especial, 0^0 é indefinido, mas DecimalMath.Pow define como 1
+    [DataRow(100.0, 0.5)] // Testando raiz quadrada
+    public void Pow_ShouldMatchMathPow(double val, double exp)
+    {
+        decimal inputValue = RoundInput(val);
+        decimal exponent = RoundInput(exp);
+        // DecimalMath.Pow tem limites para evitar overflow que são mais restritos que Math.Pow
+        decimal expected = (decimal)Math.Pow((double)inputValue, (double)exponent);
+        decimal actual = DecimalMath.Pow(inputValue, exponent);
+        Assert.AreEqual(expected, actual, Tolerance, $"Pow({inputValue}, {exponent})");
     }
 }

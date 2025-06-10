@@ -294,7 +294,7 @@ public static class DecimalMath
         }
     }
 
-    public static decimal Ln(decimal value)
+    public static decimal Ln_MinMax(decimal value)
     {
         if (value <= 0m)
             throw new ArgumentOutOfRangeException(nameof(value), "Argumento para Log deve ser positivo.");
@@ -340,9 +340,79 @@ public static class DecimalMath
         return p * LN2 + ln_s;
     }
 
+    public static decimal Ln_tylor(decimal value)
+    {
+        if (value <= 0m)
+            throw new ArgumentOutOfRangeException(nameof(value), "Argumento para Log deve ser positivo.");
+        if (value == 1m) return 0m;
+
+        decimal s = value;
+        int p = 0;
+
+        while (s >= 2m) { s /= 2m; p++; }
+        while (s < 1m) { s *= 2m; p--; }
+
+        decimal y = (s - 1m) / (s + 1m);
+        decimal ySquared = y * y;
+
+        decimal termComponent = y;
+        decimal sum_logs_s = y;
+
+        var nTerms = DecimalMath.MaxTerms + 10;
+
+        for (int n = 1; n < nTerms; n++)
+        {
+            termComponent *= ySquared;
+            decimal termToAdd = termComponent / (2 * n + 1);
+
+            if (sum_logs_s + termToAdd == sum_logs_s)
+                break;
+            sum_logs_s += termToAdd;
+        }
+        return 2m * sum_logs_s + p * DecimalMath.LN2;
+    }
+
+    public static decimal Exp_tylor(decimal value)
+    {
+        if (value == 0m) return 1m;
+
+        if (value < -65m) return 0m;
+        if (value > 66m) throw new OverflowException("Argumento muito grande para Exp, resultaria em overflow.");
+
+        decimal k_decimal = Math.Round(value / DecimalMath.LN2);
+        int k = (int)k_decimal;
+        decimal r = value - k_decimal * DecimalMath.LN2;
+
+        decimal term = 1m;
+        decimal sum_er = 1m;
+
+        for (int n = 1; n < DecimalMath.MaxTerms; n++)
+        {
+            term *= r / n;
+            if (sum_er + term == sum_er)
+                break;
+            sum_er += term;
+        }
+
+        decimal twoPowerK = 1m;
+        if (k > 0)
+        {
+            for (int i = 0; i < k; i++) twoPowerK *= 2m;
+        }
+        else if (k < 0)
+        {
+            // Usar 0.5m para multiplicação em vez de divisão repetida pode ser marginalmente melhor
+            // mas a divisão por 2m é exata para decimal.
+            for (int i = 0; i < -k; i++) twoPowerK /= 2m;
+        }
+        return twoPowerK * sum_er;
+    }
+
+
+
     public static decimal Log10(decimal value)
     {
-        return Ln(value) * INV_LOG10;
+        return Ln_MinMax(value) * INV_LOG10;
     }
 
     public static decimal Log(decimal value, decimal baseValue)
@@ -351,10 +421,10 @@ public static class DecimalMath
             throw new ArgumentOutOfRangeException(nameof(baseValue), "Base do logaritmo deve ser positiva e diferente de 1.");
         if (value <= 0m)
             throw new ArgumentOutOfRangeException(nameof(value), "Valor do logaritmo deve ser positivo.");
-        return Ln(value) / Ln(baseValue);
+        return Ln_MinMax(value) / Ln_MinMax(baseValue);
     }
 
-    public static decimal Exp(decimal value)
+    public static decimal Exp_MinMax(decimal value)
     {
         if (value == 0m) return 1m;
         if (value < -65m) return 0m;
@@ -480,6 +550,14 @@ public static class DecimalMath
         if (value < 0m)
             throw new ArgumentOutOfRangeException(nameof(exponent), "Não é possível calcular a potência de um número negativo com expoente não inteiro.");
 
-        return Exp(exponent * Ln(value));
+        var pow = Exp_tylor(exponent * Ln_tylor(value));
+        var nDigits = GetDecimalDigit(pow);
+
+        if (nDigits > 20)
+            return Math.Round(pow, nDigits - 1); // para corrigit casos como Pow(100,0.5) = 10.000000000000000000000000000001
+
+        return pow;
     }
+
+    public static int GetDecimalDigit(decimal value) => (decimal.GetBits(value)[3] >> 16) & 0xFF;
 }

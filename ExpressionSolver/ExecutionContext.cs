@@ -31,8 +31,17 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
 
     public bool TryAddFunctionCreator(string name, int arity, Func<IList<IExpression>, IFunction> funcCreator)
     {
-        if (HasIdentifier(name)) return false;
-        return _functionCreators.TryAdd(name, new FunctionMetadata(arity, funcCreator));
+        if (string.IsNullOrWhiteSpace(name))
+            return false;
+
+        if (HasIdentifier(name))
+            return false;
+
+        if (arity < -1 || arity > 100)
+            return false;
+
+        _functionCreators[name] = new FunctionMetadata(arity, funcCreator);
+        return true;
     }
     public bool TryRemoveFunctionCreator(string name) => _functionCreators.Remove(name);
     public bool TryGetFunctionCreator(string name, [MaybeNullWhen(false)] out Func<IList<IExpression>, IFunction> funcCreator)
@@ -88,7 +97,7 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
             }
 
             // 1. Tentativa de colapso total para constante se todos os operandos forem constantes
-            bool canConstantEval = (op is Function func && func.ConstantEval) || op is BinaryOperator || op is UnaryOperator;
+            bool canConstantEval = (op is IFunction func && func.ConstantEval) || op is IBinaryOperator || op is IUnaryOperator;
             if (allOperandsAreConstant && canConstantEval)
             {
                 IExpression? tempNodeToCompute = null;
@@ -96,7 +105,7 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
                 {
                     tempNodeToCompute = opCreatorEval(optimizedOperands);
                 }
-                else if (op is Function opFuncEval && _functionCreators.TryGetValue(opFuncEval.Name, out var funcMetaEval))
+                else if (op is IFunction opFuncEval && _functionCreators.TryGetValue(opFuncEval.Name, out var funcMetaEval))
                 {
                     tempNodeToCompute = funcMetaEval.Creator(optimizedOperands);
                 }
@@ -155,7 +164,7 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
                 {
                     return opCreatorRebuild(optimizedOperands);
                 }
-                else if (op is Function opFuncRebuild && _functionCreators.TryGetValue(opFuncRebuild.Name, out var funcMetaRebuild))
+                else if (op is IFunction opFuncRebuild && _functionCreators.TryGetValue(opFuncRebuild.Name, out var funcMetaRebuild))
                 {
                     return funcMetaRebuild.Creator(optimizedOperands);
                 }

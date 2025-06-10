@@ -18,7 +18,7 @@ public class ExpressionSolverVSStringMath
     private const string MidExpressionMath = "1 + 2 * 3 - 4 / 2 + (sqrt 16) - 3 ^ 2";
     private const string LongExpressionMath = "1 + 2 * 3 - 4 / 2 + (sqrt 16) - 3 ^ 2 + (5 max 10) - (3 min 7) + (abs -5) + (100 log 2)";
 
-    private ExpressionSolver.ExecutionContext _context = ExpressionSolver.ExecutionContext.CreateStandardContext();
+    private ExpressionSolver.ExecutionContext _context = ExpressionSolver.ExecutionContext.CreateStandardContext_old();
 
     [Benchmark]
     public decimal ExpressionSolver_ShortExpression() => ShortExpression.SolveExpression();

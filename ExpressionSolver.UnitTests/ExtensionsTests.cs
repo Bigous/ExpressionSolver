@@ -36,4 +36,13 @@ public sealed class ExtensionsTests
         decimal er = Convert.ToDecimal(expectedResult);
         Assert.AreEqual(er, result, "Default context should solve simple expressions correctly.");
     }
+
+    [DataTestMethod]
+    [DataRow("min(5,8) % max(2,3)", 2)]
+    public void DefaultContextVariadicArityTests(string expression, double expectedResult)
+    {
+        decimal result = expression.SolveExpression();
+        decimal er = Convert.ToDecimal(expectedResult);
+        Assert.AreEqual(er, result, "Default context should solve variadic arity expressions correctly.");
+    }
 }

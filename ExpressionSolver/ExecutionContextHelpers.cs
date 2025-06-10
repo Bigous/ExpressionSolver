@@ -12,6 +12,17 @@ public partial class ExecutionContext
     internal record FunctionMetadata(int Arity, Func<IList<IExpression>, IFunction> Creator);
     internal record OperatorMetadata(string Name, int Precedence, bool IsRightAssociative, int Arity, bool IsUnary = false);
 
+    /// <summary>
+    /// Marcador utilizado para identificar o início dos argumentos de funções com aridade variável
+    /// </summary>
+    internal class EndArgumentsMarker : IExpression
+    {
+        public decimal Compute()
+        {
+            throw new InvalidOperationException($"Marcador de fim de argumentos não deve ser computado");
+        }
+    }
+
     internal bool HasIdentifier(string identifier) => _functionCreators.ContainsKey(identifier) || _variables.ContainsKey(identifier) || _constants.ContainsKey(identifier) || _operatorCreators.ContainsKey(identifier);
 
     internal IList<Token> Tokenize(string expression)
@@ -227,6 +238,13 @@ public partial class ExecutionContext
 
                 case TokenType.FunctionCall:
                     operatorStack.Push(token);
+                    // Se a próxima token for um parêntese esquerdo e a função tiver aridade variável,
+                    // adiciona um marcador na pilha de saída
+                    if (tokenIndex < tokens.Count && tokens[tokenIndex].Type == TokenType.LeftParenthesis &&
+                        _functionCreators.TryGetValue(token.Value, out var metadata) && metadata.Arity == -1)
+                    {
+                        outputStack.Push(new EndArgumentsMarker());
+                    }
                     break;
 
                 case TokenType.Comma:
@@ -357,30 +375,55 @@ public partial class ExecutionContext
     internal void ApplyFunctionCall(Stack<IExpression> outputStack, Stack<Token> operatorStack)
     {
         Token funcToken = operatorStack.Pop();
-        if (!_functionCreators.TryGetValue(funcToken.Value, out var funcMetadata))
+        string funcName = funcToken.Value;
+
+        if (!_functionCreators.TryGetValue(funcName, out var metadata))
         {
-            throw new InvalidOperationException($"Metadados da função não encontrados para {funcToken.Value}");
+            throw new InvalidOperationException($"Função desconhecida: {funcName}");
         }
 
-        int expectedArity = funcMetadata.Arity;
-        var funcCreator = funcMetadata.Creator;
+        List<IExpression> args = new();
 
-        var args = new List<IExpression>();
-        if (expectedArity > 0)
+        if (metadata.Arity == -1) // Função de aridade variável
         {
-            if (outputStack.Count < expectedArity)
+            while (outputStack.Count > 0)
             {
-                throw new InvalidOperationException($"Argumentos insuficientes na pilha para a função {funcToken.Value}. Esperado: {expectedArity}, Pilha contém: {outputStack.Count}");
+                var expr = outputStack.Pop();
+                if (expr is EndArgumentsMarker)
+                {
+                    break;
+                }
+                args.Insert(0, expr);
             }
-            for (int i = 0; i < expectedArity; i++)
+        }
+        else // Função de aridade fixa
+        {
+            if (metadata.Arity > 0)
             {
-                args.Add(outputStack.Pop());
+                if (outputStack.Count < metadata.Arity)
+                {
+                    throw new InvalidOperationException($"Operandos insuficientes na pilha para a função de aridade fixa '{funcName}'. Esperado: {metadata.Arity}, Encontrado na pilha: {outputStack.Count}");
+                }
+                for (int i = 0; i < metadata.Arity; i++)
+                {
+                    // Verificação crucial para evitar consumir um marcador de uma função externa
+                    if (outputStack.Peek() is EndArgumentsMarker)
+                    {
+                        throw new InvalidOperationException($"Erro de parsing: Função de aridade fixa '{funcName}' encontrou um EndArgumentsMarker inesperadamente ao coletar o argumento {i + 1} de {metadata.Arity}. Isso indica um problema com o aninhamento de funções ou um EndArgumentsMarker perdido.");
+                    }
+                    args.Insert(0, outputStack.Pop());
+                }
             }
-            args.Reverse();
+            // Se metadata.Arity == 0, args permanece vazio, o que é correto.
         }
 
-        IExpression funcExpressionNode = funcCreator(args);
-        outputStack.Push(funcExpressionNode);
+        IFunction function = metadata.Creator(args);
+
+        if (function.Arity >= 0 && function.Arity != args.Count)
+        {
+            throw new InvalidOperationException($"Função '{funcName}' espera {function.Arity} {(function.Arity == 1 ? "parâmetro" : "parâmetros")}, mas recebeu {args.Count}.");
+        }
+
+        outputStack.Push(function);
     }
-
 }

@@ -12,7 +12,7 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
 {
     internal static ExecutionContext DefaulContext = CreateStandardContext();
 
-    public static ExecutionContext CreateStandardContext()
+    public static ExecutionContext CreateStandardContext_old()
     {
         ExecutionContext ret = new ExecutionContext();
 
@@ -74,8 +74,8 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
         ret.TryAddFunctionCreator("tan", 1, static parameters => new Function("tan", 15, 1, true, parameters, parameters => DecimalMath.Tan(parameters[0].Compute())));
         ret.TryAddFunctionCreator("log", 2, static parameters => new Function("log", 15, 2, true, parameters, parameters => DecimalMath.Log(parameters[0].Compute(), parameters[1].Compute())));
         ret.TryAddFunctionCreator("log10", 1, static parameters => new Function("log10", 15, 1, true, parameters, parameters => DecimalMath.Log10(parameters[0].Compute())));
-        ret.TryAddFunctionCreator("ln", 1, static parameters => new Function("ln", 15, 1, true, parameters, parameters => DecimalMath.Ln(parameters[0].Compute())));
-        ret.TryAddFunctionCreator("exp", 1, static parameters => new Function("exp", 15, 1, true, parameters, parameters => DecimalMath.Exp(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("ln", 1, static parameters => new Function("ln", 15, 1, true, parameters, parameters => DecimalMath.Ln_MinMax(parameters[0].Compute())));
+        ret.TryAddFunctionCreator("exp", 1, static parameters => new Function("exp", 15, 1, true, parameters, parameters => DecimalMath.Exp_MinMax(parameters[0].Compute())));
         ret.TryAddFunctionCreator("asin", 1, static parameters => new Function("asin", 15, 1, true, parameters, parameters => DecimalMath.Asin(parameters[0].Compute())));
         ret.TryAddFunctionCreator("acos", 1, static parameters => new Function("acos", 15, 1, true, parameters, parameters => DecimalMath.Acos(parameters[0].Compute())));
         ret.TryAddFunctionCreator("atan", 1, static parameters => new Function("atan", 15, 1, true, parameters, parameters => DecimalMath.Atan(parameters[0].Compute())));
@@ -142,7 +142,7 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
         return ret;
     }
 
-    public static ExecutionContext CreateStandardContext_New()
+    public static ExecutionContext CreateStandardContext()
     {
         ExecutionContext ret = new ExecutionContext();
 
@@ -192,8 +192,8 @@ public partial class ExecutionContext // Adicionado partial para o caso de Token
         ret.TryAddFunctionCreator("tan", 1, static parameters => new FunctionOneArg("tan", parameters[0], static parameters => DecimalMath.Tan(parameters.Compute())));
         ret.TryAddFunctionCreator("log", 2, static parameters => new FunctionTwoArgs("log", parameters[0], parameters[1], static (p1, p2) => DecimalMath.Log(p1.Compute(), p2.Compute())));
         ret.TryAddFunctionCreator("log10", 1, static parameters => new FunctionOneArg("log10", parameters[0], static parameters => DecimalMath.Log10(parameters.Compute())));
-        ret.TryAddFunctionCreator("ln", 1, static parameters => new FunctionOneArg("ln", parameters[0], static parameters => DecimalMath.Ln(parameters.Compute())));
-        ret.TryAddFunctionCreator("exp", 1, static parameters => new FunctionOneArg("exp", parameters[0], static parameters => DecimalMath.Exp(parameters.Compute())));
+        ret.TryAddFunctionCreator("ln", 1, static parameters => new FunctionOneArg("ln", parameters[0], static parameters => DecimalMath.Ln_MinMax(parameters.Compute())));
+        ret.TryAddFunctionCreator("exp", 1, static parameters => new FunctionOneArg("exp", parameters[0], static parameters => DecimalMath.Exp_MinMax(parameters.Compute())));
         ret.TryAddFunctionCreator("asin", 1, static parameters => new FunctionOneArg("asin", parameters[0], static parameters => DecimalMath.Asin(parameters.Compute())));
         ret.TryAddFunctionCreator("acos", 1, static parameters => new FunctionOneArg("acos", parameters[0], static parameters => DecimalMath.Acos(parameters.Compute())));
         ret.TryAddFunctionCreator("atan", 1, static parameters => new FunctionOneArg("atan", parameters[0], static parameters => DecimalMath.Atan(parameters.Compute())));

@@ -78,10 +78,10 @@ public class DecimalMathBenchs
         {
             // Para bases positivas, usamos a fórmula padrão
             if (value > 0m)
-                return DecimalMath.Exp(exponent * DecimalMath.Ln(value));
+                return DecimalMath.Exp_MinMax(exponent * DecimalMath.Ln_MinMax(value));
 
             // Para bases negativas (o expoente já foi verificado como inteiro)
-            decimal result = DecimalMath.Exp(exponent * DecimalMath.Ln(-value));
+            decimal result = DecimalMath.Exp_MinMax(exponent * DecimalMath.Ln_MinMax(-value));
             return exponent % 2m != 0m ? -result : result;
         }
         catch (OverflowException)
@@ -555,13 +555,13 @@ public class DecimalMathBenchs
     public double Value { get; set; }
 
     [Benchmark]
-    public void Ln_MinMax() => DecimalMath.Ln((decimal)Value);
+    public void Ln_MinMax() => DecimalMath.Ln_MinMax((decimal)Value);
 
     [Benchmark]
     public void Ln_Tylor() => Ln_tylor((decimal)Value);
 
     [Benchmark]
-    public void Exp_MinMax() => DecimalMath.Exp((decimal)Value);
+    public void Exp_MinMax() => DecimalMath.Exp_MinMax((decimal)Value);
 
     [Benchmark]
     public void Exp_Tylor() => Exp_tylor((decimal)Value);

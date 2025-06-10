@@ -8,7 +8,7 @@ namespace ExpressionSolverBench;
 [MemoryDiagnoser]
 public class BuildExpressionTreeOptimizations
 {
-    static readonly ExecutionContext context = ExecutionContext.CreateStandardContext();
+    static readonly ExecutionContext context = ExecutionContext.CreateStandardContext_old();
     const string expression = "1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + ln(100)";
     IList<Token> tokens = context.Tokenize(expression);
 
