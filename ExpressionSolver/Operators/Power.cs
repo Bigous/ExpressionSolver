@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class Power(IExpression Left, IExpression Right) : IBinaryOperator
+internal class Power(IExpression Left, IExpression Right) : IBinaryOperator
 {
     public string Name => "**";
 

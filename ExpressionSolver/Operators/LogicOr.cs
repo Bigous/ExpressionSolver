@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class LogicOr(IExpression Left, IExpression Right) : IBinaryOperator
+internal class LogicOr(IExpression Left, IExpression Right) : IBinaryOperator
 {
     public string Name => "||";
 

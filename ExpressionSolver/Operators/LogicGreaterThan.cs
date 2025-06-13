@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class LogicGreaterThan(IExpression Left, IExpression Right) : IBinaryOperator
+internal class LogicGreaterThan(IExpression Left, IExpression Right) : IBinaryOperator
 {
     public string Name => ">";
 

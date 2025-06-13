@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class LogicAnd(IExpression Left, IExpression Right) : IBinaryOperator
+internal class LogicAnd(IExpression Left, IExpression Right) : IBinaryOperator
 {
     public string Name => "&&";
 

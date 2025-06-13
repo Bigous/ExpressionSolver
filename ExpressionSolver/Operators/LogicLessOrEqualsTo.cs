@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class LogicLessOrEqualsTo(IExpression Left, IExpression Right) : IBinaryOperator
+internal class LogicLessOrEqualsTo(IExpression Left, IExpression Right) : IBinaryOperator
 {
     public string Name => "<=";
 

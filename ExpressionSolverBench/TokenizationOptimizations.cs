@@ -9,7 +9,9 @@ namespace ExpressionSolverBench;
 [MemoryDiagnoser]
 public class TokenizationOptimizations
 {
+#pragma warning disable CS0618 // O tipo ou membro é obsoleto
     static readonly ExecutionContext context = ExecutionContext.CreateStandardContext_old();
+#pragma warning restore CS0618 // O tipo ou membro é obsoleto
     const string Expression = "1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + ln(100)";
 
     Dictionary<string, Func<IList<IExpression>, IOperator>> _operatorCreators = new() {

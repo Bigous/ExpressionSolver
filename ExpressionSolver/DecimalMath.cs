@@ -2,25 +2,62 @@ using System;
 
 namespace ExpressionSolver;
 
+/// <summary>
+/// Provides mathematical functions and constants for <see cref="decimal"/> types.
+/// This class aims to offer higher precision alternatives or decimal-specific implementations
+/// for common math operations.
+/// </summary>
 public static class DecimalMath
 {
+    /// <summary>
+    /// Represents the mathematical constant Pi (π).
+    /// </summary>
     public const decimal PI = 3.1415926535897932384626433832m;
+
+    /// <summary>
+    /// Represents Pi (π) divided by 2.
+    /// </summary>
     public const decimal PI_OVER_2 = PI / 2m;
+
+    /// <summary>
+    /// Represents three times Pi (3π) divided by 2.
+    /// </summary>
     public const decimal THREE_PI_OVER_2 = (3m * PI) / 2m;
+
+    /// <summary>
+    /// Represents two times Pi (2π).
+    /// </summary>
     public const decimal TWO_PI = 2m * PI;
+
+    /// <summary>
+    /// Represents the mathematical constant e (Euler's number).
+    /// </summary>
     public const decimal E = 2.7182818284590452353602874713m;
-    public const decimal LN2 = 0.6931471805599453094172321214m; // ln(2)
-    public const decimal INV_LOG10 = 0.4342944819032518276511289189m; // 1 / Log(10)
 
-    public const int MaxIterations = 100; // Ainda pode ser usado por Sqrt
-    public const int MaxTerms = 50;    // Ainda pode ser usado por Sin, Cos, Atan
+    /// <summary>
+    /// Represents the natural logarithm of 2 (ln(2)).
+    /// </summary>
+    public const decimal LN2 = 0.6931471805599453094172321214m;
 
-    // Grau do polinômio: 20
-    // Intervalo de aproximação para x_poly: (0.5, 1.0]
-    // Função aproximada: ln(x_poly)
-    // Precisão de trabalho mpmath (dps): 50
-    // Número de pontos de ajuste: 10000
-    // Erro maximo aferido: 3.783002313e-17
+    /// <summary>
+    /// Represents 1 divided by the natural logarithm of 10 (1 / ln(10)), used for converting natural log to base-10 log.
+    /// This is equivalent to log_10(e).
+    /// </summary>
+    public const decimal INV_LOG10 = 0.4342944819032518276511289189m;
+
+    /// <summary>
+    /// Maximum number of iterations for iterative algorithms like Sqrt.
+    /// </summary>
+    public const int MaxIterations = 100;
+
+    /// <summary>
+    /// Maximum number of terms for series expansions (e.g., in Sin, Cos, Atan Taylor series).
+    /// </summary>
+    public const int MaxTerms = 50;
+
+    // Polynomial coefficients for Ln approximation.
+    // Degree: 20, Approximation interval for x_poly: (0.5, 1.0], Target function: ln(x_poly)
+    // Max observed error: 3.78e-17
     internal static readonly decimal[] LnCoefficients = new decimal[]
     {
         -27.7820315854339204174599445676875473991892085m,
@@ -46,12 +83,8 @@ public static class DecimalMath
         -3.94288015730036885177992682296129125213130049m
     };
 
-    // Coeficientes calculados com mpmath(alta precisão):
-    // Grau do polinômio: 18
-    // Intervalo de aproximação para x_poly: (-0.34657359027997265470861606072908828403775006718013, 0.34657359027997265470861606072908828403775006718013]
-    // Função aproximada: exp(x_poly)
-    // Precisão de trabalho mpmath (dps): 50
-    // Número de pontos de ajuste: 10000
+    // Polynomial coefficients for Exp approximation.
+    // Degree: 18, Approximation interval for x_poly: (-0.34657..., 0.34657...], Target function: exp(x_poly)
     internal static readonly decimal[] ExpCoefficients = new decimal[]
     {
         0.00000000000000015643281607979890113134415758309075331910053m,
@@ -75,11 +108,8 @@ public static class DecimalMath
         0.999999999999999999999999999999999654515407177m
     };
 
-    // Grau do polinômio: 20
-    // Intervalo de aproximação para x_poly: (0, 1.5707963267948966192313216916397514420985846996876]
-    // Função aproximada: sin(x_poly)
-    // Precisão de trabalho mpmath (dps): 50
-    // Número de pontos de ajuste: 10000
+    // Polynomial coefficients for Sin approximation.
+    // Degree: 20, Approximation interval for x_poly: (0, PI/2], Target function: sin(x_poly)
     private static readonly decimal[] SinCoefficients = new decimal[]
     {
         0.000000000000000000288565372967092080154910283554541578014434566m,
@@ -105,11 +135,8 @@ public static class DecimalMath
         0.00000000000000000000000000033440456681639416397223173331817625024433154m
     };
 
-    // Grau do polinômio: 20
-    // Intervalo de aproximação para x_poly: (0, 1.5707963267948966192313216916397514420985846996876]
-    // Função aproximada: cos(x_poly)
-    // Precisão de trabalho mpmath (dps): 50
-    // Número de pontos de ajuste: 10000
+    // Polynomial coefficients for Cos approximation.
+    // Degree: 20, Approximation interval for x_poly: (0, PI/2], Target function: cos(x_poly)
     private static readonly decimal[] CosCoefficients = new decimal[]
     {
         0.000000000000000000288565372964675876144757721059369296791409032m,
@@ -135,30 +162,37 @@ public static class DecimalMath
         0.999999999999999999999999999677571165776348051m
     };
 
+    /// <summary>
+    /// Computes the sine of the specified angle.
+    /// Angle is assumed to be in radians.
+    /// Uses polynomial approximation for values in the range [0, PI/2] after argument reduction.
+    /// </summary>
+    /// <param name="value">An angle, measured in radians.</param>
+    /// <returns>The sine of <paramref name="value"/>.</returns>
     public static decimal Sin(decimal value)
     {
-        // Normalizar para o intervalo [0, 2*PI)
+        // Normalize to the interval [0, 2*PI)
         decimal x = value % TWO_PI;
         if (x < 0m) x += TWO_PI;
 
-        // Redução de argumento para [0, PI/2] para melhor convergência
+        // Argument reduction to [0, PI/2] for better convergence
         decimal sign = 1m;
-        if (x > PI_OVER_2 && x <= PI) // Quadrante II
+        if (x > PI_OVER_2 && x <= PI) // Quadrant II
         {
             x = PI - x;
         }
-        else if (x > PI && x <= THREE_PI_OVER_2) // Quadrante III
+        else if (x > PI && x <= THREE_PI_OVER_2) // Quadrant III
         {
             x = x - PI;
             sign = -1m;
         }
-        else if (x > THREE_PI_OVER_2 && x < TWO_PI) // Quadrante IV
+        else if (x > THREE_PI_OVER_2 && x < TWO_PI) // Quadrant IV
         {
             x = TWO_PI - x;
             sign = -1m;
         }
 
-        // Avaliação do polinômio usando o método de Horner
+        // Polynomial evaluation using Horner's method
         decimal result = 0;
         foreach (var coeff in SinCoefficients)
         {
@@ -168,6 +202,13 @@ public static class DecimalMath
         return sign * result;
     }
 
+    /// <summary>
+    /// Computes the cosine of the specified angle.
+    /// Angle is assumed to be in radians.
+    /// Uses polynomial approximation for values in the range [0, PI/2] after argument reduction.
+    /// </summary>
+    /// <param name="value">An angle, measured in radians.</param>
+    /// <returns>The cosine of <paramref name="value"/>.</returns>
     public static decimal Cos(decimal value)
     {
         decimal x = value % TWO_PI;
@@ -189,7 +230,7 @@ public static class DecimalMath
             x = TWO_PI - x;
         }
 
-        // Avaliação do polinômio usando o método de Horner
+        // Polynomial evaluation using Horner's method
         decimal result = 0;
         foreach (var coeff in CosCoefficients)
         {
@@ -199,18 +240,32 @@ public static class DecimalMath
         return sign * result;
     }
 
+    /// <summary>
+    /// Computes the tangent of the specified angle.
+    /// Angle is assumed to be in radians.
+    /// </summary>
+    /// <param name="value">An angle, measured in radians.</param>
+    /// <returns>The tangent of <paramref name="value"/>.</returns>
+    /// <exception cref="DivideByZeroException">Thrown if the cosine of <paramref name="value"/> is zero.</exception>
     public static decimal Tan(decimal value)
     {
         decimal cosVal = Cos(value);
         if (cosVal == 0m)
-            throw new DivideByZeroException("Tangente não definida: cosseno do argumento é zero.");
+            throw new DivideByZeroException("Tangent undefined: cosine of the argument is zero.");
         return Sin(value) / cosVal;
     }
 
+    /// <summary>
+    /// Computes the angle whose tangent is the specified number (arctangent).
+    /// Uses Taylor series expansion for |value| &lt;= 1, and identities for |value| &gt; 1.
+    /// </summary>
+    /// <param name="value">A number representing a tangent.</param>
+    /// <returns>An angle, θ, measured in radians, such that -π/2 ≤ θ ≤ π/2.
+    /// Returns <see cref="decimal.Zero"/> if <paramref name="value"/> is 0.
+    /// </returns>
     public static decimal Atan(decimal value)
     {
         if (value == 0m) return 0m;
-
         if (value == 1m) return PI / 4m;
         if (value == -1m) return -PI / 4m;
 
@@ -238,10 +293,18 @@ public static class DecimalMath
         return sum;
     }
 
+    /// <summary>
+    /// Computes the angle whose sine is the specified number (arcsine).
+    /// </summary>
+    /// <param name="value">A number representing a sine, where -1 ≤ value ≤ 1.</param>
+    /// <returns>An angle, θ, measured in radians, such that -π/2 ≤ θ ≤ π/2.
+    /// Returns NaN if <paramref name="value"/> &lt; -1 or <paramref name="value"/> &gt; 1.
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="value"/> is less than -1 or greater than 1.</exception>
     public static decimal Asin(decimal value)
     {
         if (value < -1m || value > 1m)
-            throw new ArgumentOutOfRangeException(nameof(value), "Argumento para Asin deve estar entre -1 e 1.");
+            throw new ArgumentOutOfRangeException(nameof(value), "Argument for Asin must be between -1 and 1.");
         if (value == 0m) return 0m;
         if (value == 1m) return PI_OVER_2;
         if (value == -1m) return -PI_OVER_2;
@@ -259,10 +322,18 @@ public static class DecimalMath
         return Atan(value / sqrtPart);
     }
 
+    /// <summary>
+    /// Computes the angle whose cosine is the specified number (arccosine).
+    /// </summary>
+    /// <param name="value">A number representing a cosine, where -1 ≤ value ≤ 1.</param>
+    /// <returns>An angle, θ, measured in radians, such that 0 ≤ θ ≤ π.
+    /// Returns NaN if <paramref name="value"/> &lt; -1 or <paramref name="value"/> &gt; 1.
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="value"/> is less than -1 or greater than 1.</exception>
     public static decimal Acos(decimal value)
     {
         if (value < -1m || value > 1m)
-            throw new ArgumentOutOfRangeException(nameof(value), "Argumento para Acos deve estar entre -1 e 1.");
+            throw new ArgumentOutOfRangeException(nameof(value), "Argument for Acos must be between -1 and 1.");
         if (value == 1m) return 0m;
         if (value == -1m) return PI;
         if (value == 0m) return PI_OVER_2;
@@ -270,6 +341,16 @@ public static class DecimalMath
         return PI_OVER_2 - Asin(value);
     }
 
+    /// <summary>
+    /// Computes the angle whose tangent is the quotient of two specified numbers (y/x).
+    /// This method correctly determines the quadrant of the angle.
+    /// </summary>
+    /// <param name="y">The y-coordinate of a point.</param>
+    /// <param name="x">The x-coordinate of a point.</param>
+    /// <returns>An angle, θ, measured in radians, such that -π &lt; θ ≤ π, and tan(θ) = <paramref name="y"/>/<paramref name="x"/>
+    /// where (<paramref name="x"/>, <paramref name="y"/>) is a point in the Cartesian plane.
+    /// Returns 0 if (x,y) is (0,0).
+    /// </returns>
     public static decimal Atan2(decimal y, decimal x)
     {
         if (x > 0m)
@@ -294,56 +375,49 @@ public static class DecimalMath
         }
     }
 
+    /// <summary>
+    /// Computes the natural (base e) logarithm of a specified number using Minimax polynomial approximation.
+    /// </summary>
+    /// <param name="value">A positive number.</param>
+    /// <returns>The natural logarithm of <paramref name="value"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="value"/> is negative or zero.</exception>
     public static decimal Ln_MinMax(decimal value)
     {
         if (value <= 0m)
-            throw new ArgumentOutOfRangeException(nameof(value), "Argumento para Log deve ser positivo.");
+            throw new ArgumentOutOfRangeException(nameof(value), "Argument for Log (Ln) must be positive.");
         if (value == 1m) return 0m;
-        if (value == E) return 1m; // Otimização para Ln(E) = 1
+        if (value == E) return 1m; // Optimization for Ln(E) = 1
 
-        // Normalizar 'value' para 's * 2^p' onde s está em [1, 2)
-        // ln(value) = p * LN2 + ln(s)
         decimal s = value;
         int p = 0;
 
         while (s >= 2m) { s /= 2m; p++; }
         while (s < 1m) { s *= 2m; p--; }
 
-        // Agora s está no intervalo [1, 2).
-        // Se s == 1m após a normalização (ex: value era uma potência de 2), então ln(s) é 0.
         if (s == 1m) return p * LN2;
 
-        // Para usar o polinômio que aproxima ln(x_poly) para x_poly em (0, 1],
-        // usamos a identidade ln(s) = -ln(1/s).
-        // Seja x_poly = 1/s. Como s está em (1, 2) (s=1 já tratado),
-        // x_poly estará em (0.5, 1). Este intervalo está dentro do domínio do polinômio (0, 1].
         decimal x_poly = 1m / s;
 
-        // Avaliação do polinômio P(x_poly) usando o método de Horner
-        // P(x) = c[0]*x^N + c[1]*x^(N-1) + ... + c[N]
-        // N = grau = LnMinimaxCoefficients.Length - 1
-        // Coeficientes são c[0] para x^30, ..., c[30] para x^0
-        //decimal poly_eval_ln_one_over_s = LnCoefficients[0];
-        //for (int i = 1; i < LnCoefficients.Length; i++)
-        //{
-        //    poly_eval_ln_one_over_s = poly_eval_ln_one_over_s * x_poly + LnCoefficients[i];
-        //}
-        decimal poly_eval_ln_one_over_s = 0;
-        foreach (var coeff in LnCoefficients)
+        decimal poly_eval_ln_one_over_s = LnCoefficients[0];
+        for (int i = 1; i < LnCoefficients.Length; i++)
         {
-            poly_eval_ln_one_over_s = poly_eval_ln_one_over_s * x_poly + coeff;
+            poly_eval_ln_one_over_s = poly_eval_ln_one_over_s * x_poly + LnCoefficients[i];
         }
 
-        // ln(s) = - poly_eval_ln_one_over_s
         decimal ln_s = -poly_eval_ln_one_over_s;
-
         return p * LN2 + ln_s;
     }
 
+    /// <summary>
+    /// Computes the natural (base e) logarithm of a specified number using Taylor series expansion.
+    /// </summary>
+    /// <param name="value">A positive number.</param>
+    /// <returns>The natural logarithm of <paramref name="value"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="value"/> is negative or zero.</exception>
     public static decimal Ln_tylor(decimal value)
     {
         if (value <= 0m)
-            throw new ArgumentOutOfRangeException(nameof(value), "Argumento para Log deve ser positivo.");
+            throw new ArgumentOutOfRangeException(nameof(value), "Argument for Log (Ln) must be positive.");
         if (value == 1m) return 0m;
 
         decimal s = value;
@@ -372,12 +446,18 @@ public static class DecimalMath
         return 2m * sum_logs_s + p * DecimalMath.LN2;
     }
 
+    /// <summary>
+    /// Computes e (Euler's number) raised to the specified power using Taylor series expansion.
+    /// </summary>
+    /// <param name="value">A number specifying a power.</param>
+    /// <returns>The number e raised to the power <paramref name="value"/>.</returns>
+    /// <exception cref="OverflowException">Thrown if <paramref name="value"/> is too large or too small, causing overflow/underflow.</exception>
     public static decimal Exp_tylor(decimal value)
     {
         if (value == 0m) return 1m;
 
         if (value < -65m) return 0m;
-        if (value > 66m) throw new OverflowException("Argumento muito grande para Exp, resultaria em overflow.");
+        if (value > 66m) throw new OverflowException("Argument too large for Exp, would result in overflow.");
 
         decimal k_decimal = Math.Round(value / DecimalMath.LN2);
         int k = (int)k_decimal;
@@ -401,65 +481,69 @@ public static class DecimalMath
         }
         else if (k < 0)
         {
-            // Usar 0.5m para multiplicação em vez de divisão repetida pode ser marginalmente melhor
-            // mas a divisão por 2m é exata para decimal.
             for (int i = 0; i < -k; i++) twoPowerK /= 2m;
         }
         return twoPowerK * sum_er;
     }
 
-
-
+    /// <summary>
+    /// Computes the base-10 logarithm of a specified number.
+    /// </summary>
+    /// <param name="value">A positive number.</param>
+    /// <returns>The base-10 logarithm of <paramref name="value"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="value"/> is negative or zero.</exception>
     public static decimal Log10(decimal value)
     {
         return Ln_MinMax(value) * INV_LOG10;
     }
 
+    /// <summary>
+    /// Computes the logarithm of a specified number in a specified base.
+    /// </summary>
+    /// <param name="value">A positive number (the argument of the logarithm).</param>
+    /// <param name="baseValue">A positive number specifying the base of the logarithm (must not be 1).</param>
+    /// <returns>The logarithm of <paramref name="value"/> in base <paramref name="baseValue"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="value"/> is negative or zero,
+    /// or if <paramref name="baseValue"/> is negative, zero, or one.</exception>
     public static decimal Log(decimal value, decimal baseValue)
     {
         if (baseValue <= 0m || baseValue == 1m)
-            throw new ArgumentOutOfRangeException(nameof(baseValue), "Base do logaritmo deve ser positiva e diferente de 1.");
+            throw new ArgumentOutOfRangeException(nameof(baseValue), "Base of the logarithm must be positive and not equal to 1.");
         if (value <= 0m)
-            throw new ArgumentOutOfRangeException(nameof(value), "Valor do logaritmo deve ser positivo.");
+            throw new ArgumentOutOfRangeException(nameof(value), "Argument of the logarithm must be positive.");
         return Ln_MinMax(value) / Ln_MinMax(baseValue);
     }
 
+    /// <summary>
+    /// Computes e (Euler's number) raised to the specified power using Minimax polynomial approximation.
+    /// </summary>
+    /// <param name="value">A number specifying a power.</param>
+    /// <returns>The number e raised to the power <paramref name="value"/>.</returns>
+    /// <exception cref="OverflowException">Thrown if <paramref name="value"/> is too large or too small, causing overflow.</exception>
     public static decimal Exp_MinMax(decimal value)
     {
         if (value == 0m) return 1m;
         if (value < -65m) return 0m;
-        if (value > 66m) throw new OverflowException("Argumento muito grande para Exp, resultaria em overflow.");
+        if (value > 66m) throw new OverflowException("Argument too large for Exp, would result in overflow.");
 
-        // Normalizar para o intervalo válido do polinômio
-        // Usamos a identidade: exp(x) = exp(k*ln(2) + r) = 2^k * exp(r)
-        // onde r está no intervalo do polinômio (-0.34657... a 0.34657...)
         decimal k_decimal = Math.Round(value / LN2);
         int k = (int)k_decimal;
         decimal r = value - k_decimal * LN2;
 
-        // Verificar se r está dentro do intervalo válido
         const decimal validRange = 0.34657359027997265470861606072908828403775006718013m;
         if (r < -validRange || r > validRange)
         {
-            // Ajustar caso esteja fora do intervalo
             k_decimal = Math.Floor(value / LN2);
             k = (int)k_decimal;
             r = value - k_decimal * LN2;
         }
 
-        // Avaliação do polinômio usando o método de Horner
-        //decimal result = ExpCoefficients[0];
-        //for (int i = 1; i < ExpCoefficients.Length; i++)
-        //{
-        //    result = result * r + ExpCoefficients[i];
-        //}
         decimal result = 0;
         foreach(var coeff in ExpCoefficients)
         {
             result = result * r + coeff;
         }
 
-        // Aplicar o fator de escala 2^k
         decimal twoPowerK = 1m;
         if (k > 0)
         {
@@ -473,9 +557,15 @@ public static class DecimalMath
         return twoPowerK * result;
     }
 
+    /// <summary>
+    /// Computes the square root of a specified number using Newton's method.
+    /// </summary>
+    /// <param name="value">A non-negative number.</param>
+    /// <returns>The square root of <paramref name="value"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="value"/> is negative.</exception>
     public static decimal Sqrt(decimal value)
     {
-        if (value < 0m) throw new ArgumentOutOfRangeException(nameof(value), "Não é possível calcular a raiz quadrada de um número negativo.");
+        if (value < 0m) throw new ArgumentOutOfRangeException(nameof(value), "Cannot calculate the square root of a negative number.");
         if (value == 0m) return 0m;
 
         decimal x = value > 1m ? value / 2m : (value + 1m) / 2m;
@@ -493,10 +583,18 @@ public static class DecimalMath
         return x;
     }
 
-    private static decimal PowBySquaring(decimal baseValue, long exponent)
+    /// <summary>
+    /// Computes a base raised to an integer exponent using exponentiation by squaring.
+    /// Internal helper for Pow.
+    /// </summary>
+    /// <param name="baseValue">The base value.</param>
+    /// <param name="exponent">A non-negative integer exponent.</param>
+    /// <returns>The result of <paramref name="baseValue"/> raised to the power of <paramref name="exponent"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if exponent is negative.</exception>
+    internal static decimal PowBySquaring(decimal baseValue, long exponent)
     {
         if (exponent < 0)
-            throw new ArgumentOutOfRangeException(nameof(exponent), "Expoente para PowBySquaring deve ser não negativo.");
+            throw new ArgumentOutOfRangeException(nameof(exponent), "Exponent for PowBySquaring must be non-negative.");
         if (exponent == 0) return 1m;
         if (baseValue == 0m) return 0m;
 
@@ -518,13 +616,22 @@ public static class DecimalMath
         return result;
     }
 
+    /// <summary>
+    /// Computes a specified number raised to a specified power.
+    /// Handles integer and non-integer exponents.
+    /// </summary>
+    /// <param name="value">A decimal number to be raised to a power (the base).</param>
+    /// <param name="exponent">A decimal number that specifies the power.</param>
+    /// <returns>The number <paramref name="value"/> raised to the power <paramref name="exponent"/>.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown for invalid operations like 0 to a negative power, or negative base to a non-integer power.</exception>
+    /// <exception cref="OverflowException">Thrown if the exponent is too large or the result overflows.</exception>
     public static decimal Pow(decimal value, decimal exponent)
     {
         if (exponent == 0m) return 1m;
         if (value == 0m)
         {
             if (exponent < 0m)
-                throw new ArgumentOutOfRangeException(nameof(exponent), "Não é possível calcular 0 elevado a uma potência negativa.");
+                throw new ArgumentOutOfRangeException(nameof(exponent), "Cannot raise 0 to a negative power.");
             return 0m;
         }
 
@@ -534,7 +641,7 @@ public static class DecimalMath
             const long practicalExponentLimit = 100000;
 
             if (Math.Abs(intExponent) > practicalExponentLimit)
-                throw new OverflowException($"Expoente inteiro ({intExponent}) excede o limite prático para Pow.");
+                throw new OverflowException($"Integer exponent ({intExponent}) exceeds practical limit for Pow.");
 
             if (intExponent < 0)
             {
@@ -546,9 +653,8 @@ public static class DecimalMath
             }
         }
 
-        // Caso para expoente não inteiro
         if (value < 0m)
-            throw new ArgumentOutOfRangeException(nameof(exponent), "Não é possível calcular a potência de um número negativo com expoente não inteiro.");
+            throw new ArgumentOutOfRangeException(nameof(exponent), "Cannot calculate the power of a negative number with a non-integer exponent.");
 
         var pow = Exp_tylor(exponent * Ln_tylor(value));
         var nDigits = GetDecimalDigit(pow);
@@ -559,5 +665,11 @@ public static class DecimalMath
         return pow;
     }
 
+    /// <summary>
+    /// Gets the number of decimal digits (scale) of a decimal value.
+    /// The scale is the number of digits to the right of the decimal point.
+    /// </summary>
+    /// <param name="value">The decimal value.</param>
+    /// <returns>The number of decimal digits.</returns>
     public static int GetDecimalDigit(decimal value) => (decimal.GetBits(value)[3] >> 16) & 0xFF;
 }

@@ -1,9 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net9.0</TargetFrameworks>
+		<!-- TargetFrameworks>net9.0;netstandard2.0</TargetFrameworks -->
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+
+		<PackageId>ExpressionSolver</PackageId>
+
+		<VersionPrefix>1.0.0</VersionPrefix>
+		<!-- Para pré-lançamentos, use VersionSuffix. Ex: alpha, beta, rc1 -->
+		<!-- <VersionSuffix>preview.1</VersionSuffix> -->
+		<!-- A propriedade Version será composta por VersionPrefix e VersionSuffix -->
+		<!-- <Version>$(VersionPrefix)</Version> -->
+		<!-- <Version Condition=" '$(VersionSuffix)' != '' ">$(Version)-$(VersionSuffix)</Version> -->
+
+
+		<Authors>Richard Natal</Authors>
+		<Product>Expression Solver</Product>
+		<Description>A powerful and extensible math string expression solver.</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/Bigous/ExpressionSolver</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Bigous/ExpressionSolver.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>math expression solver parser calculator arithmetic</PackageTags>
+		<PackageReleaseNotes>First version containing math constants (pi, e), operators (+, -, /, **, etc...), functions (sin, cos, min, sqrt, etc...), custom variables (x, y, my_variable, etc...), custom functions (my_func).</PackageReleaseNotes>
+
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+	</PropertyGroup>
 
 </Project>

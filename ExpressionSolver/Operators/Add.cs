@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class Add(IExpression Left, IExpression Right) : IBinaryOperator
+internal class Add(IExpression Left, IExpression Right) : IBinaryOperator
 {
     public string Name => "+";
 

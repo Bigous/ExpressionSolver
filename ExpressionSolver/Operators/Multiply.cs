@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class Multiply(IExpression Left, IExpression Right) : IBinaryOperator
+internal class Multiply(IExpression Left, IExpression Right) : IBinaryOperator
 {
     public string Name => "*";
 

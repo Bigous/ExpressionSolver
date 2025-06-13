@@ -8,7 +8,9 @@ namespace ExpressionSolverBench;
 [MemoryDiagnoser]
 public class BuildExpressionTreeOptimizations
 {
+#pragma warning disable CS0618 // O tipo ou membro é obsoleto
     static readonly ExecutionContext context = ExecutionContext.CreateStandardContext_old();
+#pragma warning restore CS0618 // O tipo ou membro é obsoleto
     const string expression = "1 + 2 * 3 - 4 / 2 + sqrt(16) - 3 ** 2 + max(5, 10) - min(3, 7) + abs(-5) + ln(100)";
     IList<Token> tokens = context.Tokenize(expression);
 

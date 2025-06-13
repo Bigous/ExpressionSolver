@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class LogicEquals(IExpression Left, IExpression Right) : IBinaryOperator
+internal class LogicEquals(IExpression Left, IExpression Right) : IBinaryOperator
 {
     public string Name => "==";
 

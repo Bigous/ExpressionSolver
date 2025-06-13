@@ -1,6 +1,6 @@
 ﻿namespace ExpressionSolver.Operators;
 
-public class Factorial(IExpression Operand) : IUnaryOperator
+internal class Factorial(IExpression Operand) : IUnaryOperator
 {
     public string Name => "!";
 
